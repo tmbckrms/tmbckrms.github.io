@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hex Helper</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121a22;
+      --panel2:#0f1620;
+      --text:#e9f1ff;
+      --muted:#9fb3c8;
+      --line:#233243;
+      --accent:#59a6ff;
+      --danger:#ff5d5d;
+      --ok:#6dff9b;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body{
+      margin:0;
+      background:linear-gradient(180deg, #070a0f 0%, #0b0f14 100%);
+      color:var(--text);
+      font-family:var(--sans);
+      min-height:100vh;
+      padding:24px;
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      display:grid;
+      gap:16px;
+    }
+
+    .title{
+      background:rgba(18,26,34,.7);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px 18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .title h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+    }
+    .title p{
+      margin:6px 0 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:rgba(18,26,34,.65);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    label{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    select, textarea, input{
+      background:var(--panel2);
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+      font-family:var(--sans);
+    }
+
+    select:focus, textarea:focus, input:focus{
+      border-color:rgba(89,166,255,.6);
+      box-shadow:0 0 0 3px rgba(89,166,255,.12);
+    }
+
+    textarea{
+      width:100%;
+      min-height:140px;
+      resize:vertical;
+      font-family:var(--mono);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    button{
+      border:none;
+      background:linear-gradient(180deg, #4f9cff 0%, #2e7cff 100%);
+      color:#061018;
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .05s ease;
+    }
+
+    button:active{ transform:scale(.98); }
+
+    .btn2{
+      background:transparent;
+      border:1px solid var(--line);
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .pill{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(0,0,0,.2);
+    }
+
+    .out{
+      font-family:var(--mono);
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      background:rgba(0,0,0,.25);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      min-height:120px;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+      margin-top:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-family:var(--mono);
+      font-size:13px;
+      overflow:hidden;
+      border-radius:14px;
+    }
+
+    th, td{
+      border-bottom:1px solid rgba(35,50,67,.6);
+      padding:10px 10px;
+      vertical-align:top;
+    }
+
+    th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:700;
+      background:rgba(0,0,0,.15);
+    }
+
+    .bad{ color:var(--danger); }
+    .ok{ color:var(--ok); }
+
+    .footer{
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+      padding:6px 0 2px;
+    }
+
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="title">
+      <h1>🔹 Hex Helper 🔹</h1>
+      <p>
+        Tool chuyển đổi <b>Hex ↔ Char ↔ Token</b>.  
+        Có hỗ trợ mã dạng <b>F4xx</b>, <b>FDxx</b>.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="row">
+          <label>⚡ Chọn chức năng:</label>
+          <select id="mode">
+            <option value="1">1️⃣ Hex ↔ Char</option>
+            <option value="2">2️⃣ Hex → Token</option>
+            <option value="3">3️⃣ Tổng quát Hex ↔ Char ↔ Token</option>
+            <option value="4">4️⃣ Bảng Ký Tự (Tra cứu)</option>
+          </select>
+
+          <span class="pill" id="status">Ready</span>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <label>🔍 Nhập dữ liệu (hex có thể có hoặc không có dấu cách):</label>
+        <textarea id="input" placeholder="Ví dụ:
+F4 7B
+F47B
+"></textarea>
+
+        <div style="height:12px"></div>
+
+        <div class="row">
+          <button id="btnRun">Dịch</button>
+          <button class="btn2" id="btnClear">Xoá</button>
+          <button class="btn2" id="btnCopy">Copy kết quả</button>
+        </div>
+
+        <div class="hint">
+          Tip:  
+          - Nhập hex: <code>F47B</code> hoặc <code>F4 7B</code> đều được.  
+          - Nhập char: ví dụ <code>ẻ</code>, <code>á</code>, <code>∫</code>.  
+          - Token là bảng riêng (hex_token).
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <div class="mini">📌 Output</div>
+            <div class="mini">Kết quả hiển thị theo mode đã chọn</div>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div id="output" class="out">...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div class="mini">📜 Bảng tra cứu</div>
+          <div class="mini">Chỉ hiện khi mode = 4</div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div id="tableWrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">Hex</th>
+              <th style="width:80px;">Char</th>
+              <th style="width:110px;">Token</th>
+              <th style="width:260px;">Công thức 1</th>
+              <th>Công thức 2</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="tableHint" class="hint">
+        Mode 4 sẽ show bảng ở đây.
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>💡 Development: Quốc Thắng • TikTok: @qtwqa</p>
+      <p>🔹 HTML: @truongmebackrooms (discord)</p>
+    </div>
+
+  </div>
+
+<script>
+/* ==============================
+   DATA (y nguyên từ Python)
+   ============================== */
+
+const hex_token = {
+  '01':'▒','02':'@','03':'@','04':'@','05':'@','06':'@','07':'@','08':'@','09':'@','0A':'@','0B':'@','0C':'@','0D':'@','0E':'@','0F':'@',
+  '10':'@','11':'@','12':'@','13':'@','14':'@','15':'@','16':'@','17':'@','18':'@','19':'▯','1A':'@','1B':'@','1C':'@','1D':'@','1E':'@','1F':'@',
+  '20':'𝒊','21':'𝒆','22':'𝜋','23':':','24':'$','25':'?','26':'@','27':'@','28':'@','29':'@','2A':'@','2B':'@','2C':',','2D':'x10','2E':'.','2F':'@',
+  '30':'0','31':'1','32':'2','33':'3','34':'4','35':'5','36':'6','37':'7','38':'8','39':'9','3A':'𝐀','3B':'𝐁','3C':'𝐂','3D':'𝐃','3E':'𝐄','3F':'𝐅',
+  '40':'𝑴','41':'Ans','42':'A','43':'B','44':'C','45':'D','46':'E','47':'F','48':'𝒙','49':'𝒚','4A':'PreAns','4B':'z','4C':'𝜃','4D':'@','4E':'@','4F':'@',
+  '50':'∑(','51':'∫(','52':'d/d𝒙(','53':'∏(','54':'@','55':'@','56':'@','57':'@','58':'Min(','59':'Max(','5A':'Mean(','5B':'Sum(','5C':'@','5D':'@','5E':'@','5F':'@',
+  '60':'(','61':'P(','62':'Q(','63':'R(','64':'Not(','65':'Neg(','66':'Conjg(','67':'Arg(','68':'Abs(','69':'Rnd(','6A':'Det(','6B':'Trn(','6C':'sinh(','6D':'cosh(','6E':'tanh(','6F':'sinh⁻¹(',
+  '70':'cosh⁻¹(','71':'tanh⁻¹(','72':'𝒆^(','73':'10^(','74':'√(','75':'ln(','76':'³√(','77':'sin(','78':'cos(','79':'tan(','7A':'sin⁻¹(','7B':'cos⁻¹(','7C':'tan⁻¹(','7D':'log(','7E':'Pol(','7F':'Rec(',
+  '80':'@','81':'@','82':'@','83':'Int(','84':'Intg(','85':'Ref(','86':'Rref(','87':'RanInt#(','88':'GCD(','89':'LCM(','8A':'RndFix(','8B':'@','8C':'@','8D':'@','8E':'@','8F':'ReP(',
+  '90':'ImP(','91':'Identity(','92':'UnitV(','93':'Angle(','94':'@','95':'@','96':'@','97':'@','98':'@','99':'@','9A':'@','9B':'@','9C':'@','9D':'@','9E':'@','9F':'@',
+  'A0':'or','A1':'xor','A2':'xnor','A3':'and','A4':'@','A5':'=','A6':'+','A7':'-','A8':'×','A9':'÷','AA':'÷R','AB':'*','AC':'∠','AD':'𝙋','AE':'𝘾','AF':'@',
+  'B0':'@','B1':'@','B2':'@','B3':'@','B4':'@','B5':'@','B6':'@','B7':'@','B8':'x̂','B9':'ŷ','BA':'x̂₁','BB':'x̂₂','BC':'@','BD':'@','BE':'@','BF':'@',
+  'C0':'–','C1':'b','C2':'o','C3':'d','C4':'h','C5':'@','C6':'@','C7':'@','C8':'⌟','C9':'^(','CA':'ˣ√(','CB':'@','CC':'@','CD':'@','CE':'@','CF':'@',
+  'D0':')','D1':'▸t','D2':'▸a+b𝒊','D3':'▸r∠𝜃','D4':'⁻¹','D5':'²','D6':'³','D7':'%','D8':'!','D9':'°','DA':'ʳ','DB':'ᵍ','DC':'▫','DD':'𝐄','DE':'𝐏','DF':'𝐓',
+  'E0':'𝐆','E1':'𝐌','E2':'𝐤','E3':'𝐦','E4':'𝝁','E5':'𝐧','E6':'𝐩','E7':'𝐟','E8':'@','E9':'▸Simp','EA':'@','EB':'@','EC':'@','ED':'@','EE':'@','EF':'@',
+
+  // token F4xx
+  'F410':'▒','F411':'▒','F412':'▒','F413':'▒','F414':'▒','F415':'▒','F416':'▒','F417':'▒','F418':'▒','F419':'▒','F41A':'▒','F41B':'▒','F41C':'▒','F41D':'▒','F41E':'▒','F41F':'▒',
+  'F420':'▒','F421':'▒','F422':'▒','F423':'▒','F424':'▒','F425':'▒','F426':'▒','F427':'▒','F428':'▒','F429':'▒','F42A':'▒','F42B':'▒','F42C':'▒','F42D':'▒','F42E':'▒','F42F':'▒',
+  'F430':'▒','F431':'▒','F432':'▒','F433':'▒','F434':'▒','F435':'▒','F436':'▒','F437':'▒','F438':'▒','F439':'▒','F43A':'▒','F43B':'▒','F43C':'▒','F43D':'▒','F43E':'▒','F43F':'▒',
+  'F440':'▒','F441':'▒','F442':'▒','F443':'▒','F444':'▒','F445':'▒','F446':'▒','F447':'▒','F448':'▒','F449':'▒','F44A':'▒','F44B':'▒','F44C':'▒','F44D':'▒','F44E':'▒','F44F':'▒',
+  'F450':'▒','F451':'▒','F452':'▒','F453':'▒','F454':'▒','F455':'▒','F456':'▒','F457':'▒','F458':'▒','F459':'▒','F45A':'▒','F45B':'▒','F45C':'▒','F45D':'▒','F45E':'▒','F45F':'▒',
+  'F460':'▒','F461':'▒','F462':'▒','F463':'▒','F464':'▒','F465':'▒','F466':'▒','F467':'▒','F468':'▒','F469':'▒','F46A':'▒','F46B':'▒','F46C':'▒','F46D':'▒','F46E':'▒','F46F':'▒',
+  'F470':'▒','F471':'▒','F472':'▒','F473':'▒','F474':'▒','F475':'▒','F476':'▒','F477':'▒','F478':'▒','F479':'▒','F47A':'▒','F47B':'▒','F47C':'▒','F47D':'▒','F47E':'▒','F47F':'▒',
+  'F480':'▒','F481':'▒','F482':'▒','F483':'▒','F484':'▒','F485':'▒','F486':'▒','F487':'▒','F488':'▒','F489':'▒','F48A':'▒','F48B':'▒','F48C':'▒','F48D':'▒','F48E':'▒','F48F':'▒',
+  'F490':'▒','F491':'▒','F492':'▒','F493':'▒','F494':'▒','F495':'▒',
+
+  'FD20':'an','FD21':'n','FD22':'@', 'FD23':'@', 'FD24':'@', 'F4F4':'▒'
+};
+
+const hex_char = {
+  '01':'▒','02':'▒','03':'▒','04':'▒','05':'▒','06':'▒','07':'▒','08':'▒','09':'▒','0A':'▒','0B':'▒','0C':'▒','0D':'▒','0E':'▒','0F':'▒',
+  '10':'𝒙','11':'𝒚','12':'𝒛','13':'…','14':'▲','15':'▼','16':'▸','17':'₋','18':'$','19':'◁','1A':'&','1B':'𝑡','1C':'ᴛ','1D':'ₜ','1E':'ₕ','1F':'₅',
+  '20':' ','21':'!','22':'"','23':'#','24':'×','25':'%','26':'÷','27':"'",'28':'(','29':')','2A':'.','2B':'+','2C':',','2D':'—','2E':'.','2F':'/',
+  '30':'0','31':'1','32':'2','33':'3','34':'4','35':'5','36':'6','37':'7','38':'8','39':'9','3A':':','3B':';','3C':'<','3D':'=','3E':'>','3F':'?',
+  '40':'@','41':'A','42':'B','43':'C','44':'D','45':'E','46':'F','47':'G','48':'H','49':'I','4A':'J','4B':'K','4C':'L','4D':'M','4E':'N','4F':'O',
+  '50':'P','51':'Q','52':'R','53':'S','54':'T','55':'U','56':'V','57':'W','58':'X','59':'Y','5A':'Z','5B':'[','5C':'▫','5D':']','5E':'^','5F':'_',
+  '60':'−','61':'a','62':'b','63':'c','64':'d','65':'e','66':'f','67':'g','68':'h','69':'i','6A':'j','6B':'k','6C':'l','6D':'m','6E':'n','6F':'o',
+  '70':'p','71':'q','72':'r','73':'s','74':'t','75':'u','76':'v','77':'w','78':'x','79':'y','7A':'z','7B':'{','7C':'|','7D':'}','7E':'~','7F':'├',
+
+  '80':'𝒊','81':'𝒆','82':'𝖝','83':'𝟏𝟎','84':'∞','85':'°','86':'ʳ','87':'ᵍ','88':'∠','89':'x̄','8A':'ȳ','8B':'x̂','8C':'ŷ','8D':'→','8E':'∏','8F':'⇒',
+  '90':'×','91':'𝟭𝟬','92':'𝟏𝟎⁻','93':'⌟','94':'≤','95':'≠','96':'≥','97':'⇩','98':'√','99':'∫','9A':'ᴀ','9B':'ʙ','9C':'ᴄ','9D':'ₙ','9E':'▶','9F':'◀',
+  'A0':'⁰','A1':'¹','A2':'²','A3':'³','A4':'⁴','A5':'⁵','A6':'⁶','A7':'⁷','A8':'⁸','A9':'⁹','AA':'⁻¹','AB':'ˣ','AC':'𝟏𝟎','AD':'₍','AE':'₎','AF':'±',
+  'B0':'₀','B1':'₁','B2':'₂','B3':'-1','B4':'ꜰ','B5':'ɴ','B6':'ᴘ','B7':'\ue0b7','B8':'𝑨','B9':'𝑩','BA':'𝑪','BB':'𝑫','BC':'𝑬','BD':'𝑭','BE':'𝑷','BF':'▷',
+
+  'C0':'∑','C1':'𝛼','C2':'𝛾','C3':'𝜀','C4':'𝜃','C5':'𝜆','C6':'𝜇','C7':'𝜋','C8':'𝜎','C9':'𝜙','CA':'ℓ','CB':'ℏ','CC':'▮','CD':'▯','CE':'₃','CF':'＿',
+
+  'D0':'𝐟','D1':'𝐩','D2':'𝐧','D3':'𝝁','D4':'𝐦','D5':'𝐤','D6':'𝐌','D7':'𝐆','D8':'𝐓','D9':'𝐏','DA':'𝐄','DB':'𝐹','DC':'ₚ','DD':'ₑ','DE':'ᴊ','DF':'ᴋ',
+
+  'E0':'\ue0e0','E1':'ᵤ','E2':'₉','E3':'Å','E4':'ₘ','E5':'ɪ','E6':'₄','E7':'\ue0e7','E8':'\ue0e8','E9':'∟','EA':'↺','EB':'\ue0eb','EC':'ⁿ','ED':'','EE':'▒','EF':'▒',
+
+  // F4xx Vietnamese
+  'F410':'Ạ','F411':'Ắ','F412':'Ằ','F413':'Ặ','F414':'Ấ','F415':'Ầ','F416':'Ẩ','F417':'Ậ','F418':'Ẽ','F419':'Ẹ','F41A':'Ế','F41B':'Ề','F41C':'Ể','F41D':'Ễ','F41E':'Ệ','F41F':'Ố',
+  'F420':'Ồ','F421':'Ổ','F422':'Ỗ','F423':'Ộ','F424':'Ợ','F425':'Ớ','F426':'Ờ','F427':'Ở','F428':'Ị','F429':'Ỏ','F42A':'Ọ','F42B':'Ỉ','F42C':'Ủ','F42D':'Ũ','F42E':'Ụ','F42F':'Ỳ',
+  'F430':'Õ','F431':'ắ','F432':'ằ','F433':'ặ','F434':'ấ','F435':'ầ','F436':'ẩ','F437':'ậ','F438':'ẽ','F439':'ẹ','F43A':'ế','F43B':'ề','F43C':'ể','F43D':'ễ','F43E':'ệ','F43F':'ố',
+  'F440':'ồ','F441':'ổ','F442':'ỗ','F443':'Ỡ','F444':'Ơ','F445':'ộ','F446':'ờ','F447':'ở','F448':'ị','F449':'Ự','F44A':'Ứ','F44B':'Ừ','F44C':'Ử','F44D':'ơ','F44E':'ớ','F44F':'Ư',
+  'F450':'À','F451':'Á','F452':'Â','F453':'Ã','F454':'Ả','F455':'Ă','F456':'ẳ','F457':'ẵ','F458':'È','F459':'É','F45A':'Ê','F45B':'Ẻ','F45C':'Ì','F45D':'Í','F45E':'Ĩ','F45F':'ỳ',
+  'F460':'Đ','F461':'ứ','F462':'Ò','F463':'Ó','F464':'Ô','F465':'ạ','F466':'ỷ','F467':'ừ','F468':'ử','F469':'Ù','F46A':'Ú','F46B':'ỹ','F46C':'ỵ','F46D':'Ý','F46E':'ỡ','F46F':'ư',
+  'F470':'à','F471':'á','F472':'â','F473':'ã','F474':'ả','F475':'ă','F476':'ữ','F477':'ẫ','F478':'è','F479':'é','F47A':'ê','F47B':'ẻ',
+
+  'F47C':'ì','F47D':'í','F47E':'ĩ','F47F':'ỉ','F480':'đ','F481':'ự','F482':'ò','F483':'ó','F484':'ô','F485':'õ','F486':'ỏ','F487':'ọ','F488':'ụ','F489':'ù',
+  'F48A':'ú','F48B':'ũ','F48C':'ủ','F48D':'ý','F48E':'ợ','F48F':'Ữ','F490':'Ẳ','F491':'Ẵ','F492':'Ẫ','F493':'Ỷ','F494':'Ỹ','F495':'Ỵ',
+
+  'FD20':'▒','FD21':'▒','FD22':'▒', 'F4F4':'▒'
+};
+
+const cong_thuc1 = {
+  '21':'[Alpha] [x10]','22':'[Shift] [x10]','23':'[Alpha] [∫]','2C':'[Shift] [)]','2D':'[x10]','2E':'[.]',
+  '30':'[0]','31':'[1]','32':'[2]','33':'[3]','34':'[4]','35':'[5]','36':'[6]','37':'[7]','38':'[8]','39':'[9]',
+  '40':'[Alpha] [M+]','41':'[Ans]','42':'[Alpha] [(-)]','43':"[Alpha] [°''']",'44':'[Alpha] [x⁻¹]',
+  '45':'[Alpha] [sin]','46':'[Alpha] [cos]','47':'[Alpha] [tan]','48':'[x]','49':'[Alpha] [)]','4A':'[Alpha] [Ans]',
+  '4B':'[Alpha] [S↔D]','50':'[Shift] [x]','51':'[∫]','52':'[Shift] [∫]','53':'[Alpha] [x]',
+  '60':'[(]','68':'[Shift] [(]','69':'[Shift] [0]',
+  '6C':'[OPTN] [1] [1]','6D':'[OPTN] [1] [2]','6E':'[OPTN] [1] [3]','6F':'[OPTN] [1] [4]','70':'[OPTN] [1] [5]','71':'[OPTN] [1] [6]',
+  '72':'[Shift] [ln]','73':'[Shift] [log▪▯]','74':'[√]','75':'[ln]','76':'[Shift] [√]',
+  '77':'[sin]','78':'[cos]','79':'[tan]','7A':'[shift] [sin]','7B':'[shift] [cos]','7C':'[shift] [tan]','7D':'[log▪▯]',
+  '7E':'[Shift] [+]','7F':'[Shift] [-]',
+  '83':'[Alpha] [+]','84':'[Alpha] [-]','87':'[Alpha] [.]','88':'[Alpha] [×]','89':'[Alpha] [÷]',
+  'A5':'[Alpha] [Calc]','A6':'[+]','A7':'[-]','A8':'[×]','A9':'[÷]','AA':'[Alpha] [Frac]','AD':'[Shift] [×]','AE':'[Shift] [÷]',
+  'C0':'(-)','C8':'[Frac]','C9':'[x▪]','CA':'[Shift] [x▪]',
+  'D0':'[)]','D4':'[x⁻¹]','D5':'[x²]','D6':'[Shift] [x²]','D7':'[Shift] [Ans]','D8':'[Shift] [x⁻¹]',
+  'D9':'[OPTN] [2] [1]','DA':'[OPTN] [2] [2]','DB':'[OPTN] [2] [3]',
+  'DC':"[°''']",'DD':"[OPTN] [3] [°''']",'DE':'[OPTN] [3] [(-)]','DF':'[OPTN] [3] [9]',
+  'E0':'[OPTN] [3] [8]','E1':'[OPTN] [3] [7]','E2':'[OPTN] [3] [6]',
+  'E3':'[OPTN] [3] [1]','E4':'[OPTN] [3] [2]','E5':'[OPTN] [3] [3]','E6':'[OPTN] [3] [4]','E7':'[OPTN] [3] [5]'
+};
+
+const cong_thuc2 = {
+  '01':'[Shift] [8] [1] [1]','02':'[Shift] [8] [1] [2]','03':'[Shift] [8] [1] [3]','04':'[Shift] [8] [1] [4]','05':'[Shift] [8] [1] [5]','06':'[Shift] [8] [1] [6]',
+  '07':'[Shift] [8] [1] [1]','08':'[Shift] [8] [1] [1]','09':'[Shift] [8] [1] [1]','0A':'[Shift] [8] [1] [(-)]',
+  '0B':'[Shift] [8] [2] [1]','0C':'[Shift] [8] [2] [2]','0D':'[Shift] [8] [3] [1]','0E':'[Shift] [8] [3] [2]','0F':'[Shift] [8] [3] [3]',
+  '10':'[Shift] [8] [3] [4]','11':"[Shift] [8] [1] [°''']",'12':'[Shift] [8] [1] [x⁻¹]',
+  '13':'[Shift] [8] [↓] [1] [2]','14':'[Shift] [8] [↓] [1] [1]',
+  '15':'[Shift] [8] [4] [1]','16':'[Shift] [8] [4] [2]','17':'[Shift] [8] [4] [3]','18':'[Shift] [8] [4] [4]',
+  '19':'[Shift] [8] [↓] [2] [1]','1A':'[Shift] [8] [↓] [2] [2]','1B':'[Shift] [8] [↓] [2] [3]','1C':'[Shift] [8] [↓] [2] [4]',
+  '1D':'[Shift] [8] [↓] [4] [1]','1E':'[Shift] [8] [↓] [4] [2]',
+  '1F':'[Shift] [8] [↓] [2] [5]','20':'[Shift] [8] [↓] [2] [6]',
+  '21':'[Shift] [8] [↓] [3] [1]','22':'[Shift] [8] [↓] [3] [2]',
+  '23':'[Shift] [8] [↓] [2] [7]','24':'[Shift] [8] [↓] [2] [8]',
+  '25':'[Shift] [8] [↑] [1] [2]','26':'[Shift] [8] [↑] [1] [1]',
+  '27':'[Shift] [8] [↓] [3] [4]','28':'[Shift] [8] [↓] [3] [3]',
+
+  '30':'[Shift] [7] [3] [1]','31':'[Shift] [7] [3] [2]','32':'[Shift] [7] [3] [3]','33':'[Shift] [7] [3] [4]','34':'[Shift] [7] [3] [5]',
+  '35':'[Shift] [7] [1] [1]','36':'[Shift] [7] [2] [1]','37':'[Shift] [7] [2] [2]','38':'[Shift] [7] [1] [2]',
+  '39':'[Shift] [7] [3] [6]','3A':'[Shift] [7] [3] [7]','3B':'[Shift] [7] [3] [8]','3C':'[Shift] [7] [3] [9]',
+  '3D':'[Shift] [7] [3] [(-)]','3E':"[Shift] [7] [3] [°''']",'3F':'[Shift] [7] [3] [x⁻¹]',
+  '40':'[Shift] [7] [4] [1]','41':'[Shift] [7] [3] [sin]','42':'[Shift] [7] [3] [cos]','43':'[Shift] [7] [3] [tan]',
+  '44':'[Shift] [7] [3] [M+]','45':'[Shift] [7] [4] [2]','46':'[Shift] [7] [2] [3]',
+  '47':'[Shift] [7] [4] [3]','48':'[Shift] [7] [4] [4]','49':'[Shift] [7] [4] [5]',
+  '4A':'[Shift] [7] [4] [6]','4B':'[Shift] [7] [1] [3]','4C':'[Shift] [7] [4] [7]','4D':'[Shift] [7] [4] [8]','4E':'[Shift] [7] [4] [9]',
+  '4F':'[Shift] [7] [1] [4]','50':'[Shift] [7] [1] [5]','51':'[Shift] [7] [2] [4]','52':'[Shift] [7] [↓] [1] [1]',
+  '53':'[Shift] [7] [2] [5]','54':'[Shift] [7] [1] [6]','55':'[Shift] [7] [↓] [2] [1]',
+  '56':'[Shift] [7] [1] [7]','57':'[Shift] [7] [↓] [1] [2]','58':'[Shift] [7] [1] [8]','59':'[Shift] [7] [1] [9]',
+  '5A':'[Shift] [7] [2] [6]','5B':'[Shift] [7] [2] [7]','5C':'[Shift] [7] [3] [x]',
+  '5D':'[Shift] [7] [↓] [1] [3]','5E':'[Shift] [7] [↓] [1] [4]'
+};
+
+/* ==============================
+   Reverse maps
+   ============================== */
+
+function reverseMap(obj){
+  const rev = {};
+  for(const k in obj){
+    const v = obj[k];
+    // nếu value trùng nhau, cái sau sẽ overwrite (y chang python)
+    // nhưng ở đây vẫn ok, vì reverse chỉ dùng cho char hiếm khi trùng.
+    rev[v] = k;
+  }
+  return rev;
+}
+
+const reverse_hex_token = reverseMap(hex_token);
+const reverse_hex_char = reverseMap(hex_char);
+
+/* ==============================
+   Helpers (đã nâng cấp so với python)
+   ============================== */
+
+function normalizeInput(s){
+  return (s ?? "").trim().replace(/\s+/g, " ");
+}
+
+// Tách input:
+// - Nếu là hex có space -> split
+// - Nếu là hex liền -> tự cắt theo 2/4
+// - Nếu là char -> tách từng ký tự
+function splitInput(input){
+  const raw = normalizeInput(input);
+  if(!raw) return [];
+
+  // Nếu có space và tất cả token đều hex
+  if(raw.includes(" ")){
+    const parts = raw.toUpperCase().split(" ").filter(Boolean);
+    const ok = parts.every(p => /^[0-9A-F]+$/.test(p));
+    if(ok) return parts;
+  }
+
+  // Nếu không có space: check nếu toàn hex
+  const upper = raw.toUpperCase();
+  const onlyHex = /^[0-9A-F]+$/.test(upper);
+
+  if(onlyHex){
+    // ưu tiên parse theo pattern:
+    // - F4 + 2 hex
+    // - FD + 2 hex
+    // - còn lại 2 hex
+    const parts = [];
+    let i = 0;
+    while(i < upper.length){
+      const remain = upper.length - i;
+
+      // F4xx
+      if(remain >= 4 && upper.slice(i, i+2) === "F4"){
+        parts.push(upper.slice(i, i+4));
+        i += 4;
+        continue;
+      }
+
+      // FDxx
+      if(remain >= 4 && upper.slice(i, i+2) === "FD"){
+        parts.push(upper.slice(i, i+4));
+        i += 4;
+        continue;
+      }
+
+      // default 2
+      if(remain >= 2){
+        parts.push(upper.slice(i, i+2));
+        i += 2;
+        continue;
+      }
+
+      // lẻ 1 ký tự -> đẩy luôn
+      parts.push(upper.slice(i));
+      break;
+    }
+    return parts;
+  }
+
+  // Char mode: tách từng ký tự
+  return Array.from(raw);
+}
+
+// Merge kiểu python: nếu input dạng ["F4","7B"] -> ["F47B"]
+function mergeHexParts(parts){
+  const merged = [];
+  let i = 0;
+  while(i < parts.length){
+    const p = (parts[i] || "").toUpperCase();
+
+    // ghép F4 xx
+    if(p === "F4" && i < parts.length - 1){
+      merged.push("F4" + (parts[i+1] || "").toUpperCase());
+      i += 2;
+      continue;
+    }
+
+    // ghép FD xx
+    if(p === "FD" && i < parts.length - 1){
+      merged.push("FD" + (parts[i+1] || "").toUpperCase());
+      i += 2;
+      continue;
+    }
+
+    merged.push(p);
+    i += 1;
+  }
+  return merged;
+}
+
+function toHexListFromInput(userInput){
+  const parts = splitInput(userInput);
+  const merged = mergeHexParts(parts);
+
+  // giống python: reverse_hex_char.get(part, reverse_hex_token.get(part, part))
+  const hexList = merged.map(part => {
+    const up = (part ?? "").toUpperCase();
+    const fromChar = reverse_hex_char[part];
+    if(fromChar) return fromChar.toUpperCase();
+
+    const fromToken = reverse_hex_token[part];
+    if(fromToken) return fromToken.toUpperCase();
+
+    // nếu nó đã là hex thì giữ nguyên
+    return up;
+  });
+
+  return hexList;
+}
+
+function computeHexCanGan(hexList){
+  // “cần gán” = không có trong cong_thuc1 và không phải space
+  // (giữ logic y hệt python của m)
+  return hexList.filter(h => !(h in cong_thuc1) && h !== "20");
+}
+
+/* ==============================
+   UI Actions
+   ============================== */
+
+const elMode = document.getElementById("mode");
+const elInput = document.getElementById("input");
+const elOut = document.getElementById("output");
+const elStatus = document.getElementById("status");
+
+const elTableWrap = document.getElementById("tableWrap");
+const elTableHint = document.getElementById("tableHint");
+const elTbody = document.getElementById("tbody");
+
+function setStatus(msg, type="ok"){
+  elStatus.textContent = msg;
+  elStatus.className = "pill " + (type === "bad" ? "bad" : "ok");
+}
+
+function renderTextOutput(lines){
+  elOut.textContent = lines.join("\n");
+}
+
+function renderTable(hexCodes){
+  elTbody.innerHTML = "";
+
+  const sorted = Array.from(hexCodes).sort((a,b)=>{
+    // sort theo độ dài rồi theo string
+    if(a.length !== b.length) return a.length - b.length;
+    return a.localeCompare(b);
+  });
+
+  for(const hexCode of sorted){
+    const tr = document.createElement("tr");
+
+    const char = hex_char[hexCode] ?? "?";
+    const token = hex_token[hexCode] ?? "?";
+    const f1 = cong_thuc1[hexCode] ?? "Không có";
+    const f2 = cong_thuc2[hexCode] ?? "Không có";
+
+    tr.innerHTML = `
+      <td>${escapeHtml(hexCode)}</td>
+      <td>${escapeHtml(char)}</td>
+      <td>${escapeHtml(token)}</td>
+      <td>${escapeHtml(f1)}</td>
+      <td>${escapeHtml(f2)}</td>
+    `;
+    elTbody.appendChild(tr);
+  }
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function run(){
+  const mode = elMode.value;
+  const userInput = normalizeInput(elInput.value);
+
+  if(!userInput){
+    setStatus("Nhập gì đó đi 😭", "bad");
+    renderTextOutput(["(trống)"]);
+    elTableWrap.style.display = "none";
+    elTableHint.style.display = "block";
+    return;
+  }
+
+  try{
+    if(mode === "4"){
+      // Bảng ký tự: xử lý giống python nhưng sửa logic hợp web hơn
+      const parts = splitInput(userInput);
+      const merged = mergeHexParts(parts);
+
+      const hexCodes = new Set();
+
+      // Nếu input là hex trực tiếp (vd F47B)
+      if(merged.length === 1 && /^[0-9A-F]{2,4}$/.test(merged[0])){
+        const hx = merged[0].toUpperCase();
+        if(hx in hex_char || hx in hex_token) hexCodes.add(hx);
+      }else{
+        // Nếu input là chuỗi ký tự -> lấy unique char
+        const seen = new Set();
+        const chars = Array.from(userInput);
+        for(const ch of chars){
+          if(seen.has(ch)) continue;
+          seen.add(ch);
+
+          const hx = reverse_hex_char[ch];
+          if(hx) hexCodes.add(hx.toUpperCase());
+        }
+      }
+
+      if(hexCodes.size === 0){
+        setStatus("Không tìm thấy mã nào 😿", "bad");
+        renderTextOutput([
+          "📜 **BẢNG KÝ TỰ TRA CỨU** 📜",
+          "Không tìm thấy ký tự/hex hợp lệ trong input."
+        ]);
+        elTableWrap.style.display = "none";
+        elTableHint.style.display = "block";
+        return;
+      }
+
+      setStatus("Đã tạo bảng ✅", "ok");
+      renderTextOutput([
+        "📜 **BẢNG KÝ TỰ TRA CỨU** 📜",
+        `Tìm thấy: ${hexCodes.size} mã`
+      ]);
+
+      elTableWrap.style.display = "block";
+      elTableHint.style.display = "none";
+      renderTable(hexCodes);
+      return;
+    }
+
+    // mode 1/2/3
+    const hexList = toHexListFromInput(userInput);
+    const hexCanGan = computeHexCanGan(hexList);
+
+    if(mode === "1"){
+      const charList = hexList.map(h => hex_char[h] ?? "?");
+      setStatus("Done ✅", "ok");
+      renderTextOutput([
+        "🔎 Kết quả:",
+        `- Mã Hex: ${hexList.join(" ")}`,
+        `- Ký tự Char: ${charList.join("")}`,
+        hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
+      ].filter(Boolean));
+
+      elTableWrap.style.display = "none";
+      elTableHint.style.display = "block";
+      return;
+    }
+
+    if(mode === "2"){
+      const tokenList = hexList.map(h => hex_token[h] ?? "?");
+      setStatus("Done ✅", "ok");
+      renderTextOutput([
+        "🔎 Kết quả:",
+        `- Mã Hex: ${hexList.join(" ")}`,
+        `- Token: ${tokenList.join(" ")}`,
+        hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
+      ].filter(Boolean));
+
+      elTableWrap.style.display = "none";
+      elTableHint.style.display = "block";
+      return;
+    }
+
+    if(mode === "3"){
+      const charList = hexList.map(h => hex_char[h] ?? "?");
+      const tokenList = hexList.map(h => hex_token[h] ?? "?");
+      setStatus("Done ✅", "ok");
+      renderTextOutput([
+        "🔎 Kết quả:",
+        `- Mã Hex: ${hexList.join(" ")}`,
+        `- Ký tự Char: ${charList.join("")}`,
+        `- Token: ${tokenList.join(" ")}`,
+        hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
+      ].filter(Boolean));
+
+      elTableWrap.style.display = "none";
+      elTableHint.style.display = "block";
+      return;
+    }
+
+  }catch(err){
+    setStatus("Lỗi rồi 💀", "bad");
+    renderTextOutput([
+      "❌ Có lỗi xảy ra:",
+      String(err)
+    ]);
+    elTableWrap.style.display = "none";
+    elTableHint.style.display = "block";
+  }
+}
+
+document.getElementById("btnRun").addEventListener("click", run);
+
+document.getElementById("btnClear").addEventListener("click", ()=>{
+  elInput.value = "";
+  renderTextOutput(["..."]);
+  setStatus("Ready", "ok");
+  elTableWrap.style.display = "none";
+  elTableHint.style.display = "block";
+});
+
+document.getElementById("btnCopy").addEventListener("click", async ()=>{
+  try{
+    await navigator.clipboard.writeText(elOut.textContent || "");
+    setStatus("Đã copy 📋", "ok");
+  }catch(e){
+    setStatus("Copy fail (browser chặn) 😭", "bad");
+  }
+});
+
+// auto run khi đổi mode
+elMode.addEventListener("change", ()=>{
+  const mode = elMode.value;
+  if(mode === "4"){
+    elTableHint.textContent = "Nhập ký tự hoặc hex để xem bảng.";
+  }else{
+    elTableHint.textContent = "Mode 4 sẽ show bảng ở đây.";
+  }
+  run();
+});
+
+// run lần đầu
+setStatus("Ready", "ok");
+renderTextOutput(["..."]);
+</script>
+</body>
+</html>
