@@ -1,1 +1,3 @@
 # tmbckrms.github.io
+
+Casio... idk...
