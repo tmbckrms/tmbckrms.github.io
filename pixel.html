@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Casio Pixel Art Tool (192×63) — Minimal</title>
+  <style>
+    :root{
+      --bg:#070b10;
+      --panel:#0b1220;
+      --line:#1e2a3a;
+      --text:#e8eef8;
+      --muted:#9db0cc;
+      --good:#2dd4bf;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(1000px 600px at 15% 10%, rgba(45,212,191,.12), transparent 60%),
+        radial-gradient(1000px 600px at 85% 20%, rgba(96,165,250,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family:var(--sans);
+      min-height:100vh;
+      padding:20px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .wrap{
+      width:min(1320px, 100%);
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:16px;
+    }
+
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+      border:1px solid var(--line);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .card header{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .title{
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .pill{
+      font-family:var(--mono);
+      font-size:12px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background:rgba(0,0,0,.2);
+      white-space:nowrap;
+    }
+
+    .body{ padding:14px 16px; }
+
+    .field{
+      display:grid;
+      gap:6px;
+      margin-bottom:12px;
+    }
+
+    label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    input[type="file"],
+    input[type="number"],
+    textarea{
+      width:100%;
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+      font-family:var(--sans);
+    }
+
+    textarea{
+      font-family:var(--mono);
+      min-height:200px;
+      resize:vertical;
+      line-height:1.35;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    @media (max-width: 560px){
+      .grid2{ grid-template-columns:1fr; }
+    }
+
+    button{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color:var(--text);
+      padding:11px 12px;
+      border-radius:16px;
+      font-weight:900;
+      text-align:left;
+      transition: .14s ease;
+    }
+    button:hover{ transform: translateY(-1px); border-color:#2a3d58; }
+    button:active{ transform: translateY(0px); }
+
+    .btns{ display:grid; gap:10px; }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .mono{ font-family:var(--mono); }
+
+    .hr{
+      height:1px;
+      background:var(--line);
+      margin:12px 0;
+    }
+
+    .kpi{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.18);
+    }
+
+    .canvasWrap{
+      padding:14px 16px;
+      display:grid;
+      gap:12px;
+    }
+
+    .canvasTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .stage{
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      overflow:auto;
+    }
+
+    canvas{
+      display:block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .miniBtn{
+      font-family:var(--mono);
+      font-weight:900;
+      padding:8px 10px;
+      border-radius:14px;
+      background:rgba(0,0,0,.22);
+      border:1px solid var(--line);
+      color:var(--text);
+      cursor:pointer;
+      text-align:center;
+    }
+
+    .miniBtn:hover{ border-color:#2a3d58; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- LEFT -->
+    <section class="card">
+      <header>
+        <div class="title">🧮 Casio Pixel Art Tool</div>
+        <div class="pill">192×63 · minimal</div>
+      </header>
+
+      <div class="body">
+        <div class="field">
+          <label>1) Chọn ảnh (PNG/JPG)</label>
+          <input id="file" type="file" accept="image/*" />
+          <div class="hint">
+            Tool sẽ tự <b>grayscale</b> và co về <span class="mono">192×63</span>.
+            Output sẽ nén dạng <span class="mono">[→] × n</span> hoặc <span class="mono">[1] × n</span>.
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>2) Threshold (đen/trắng)</label>
+            <input id="threshold" type="number" min="0" max="255" value="128" />
+            <div class="hint">Gray &lt; threshold → pixel đen</div>
+          </div>
+
+          <div class="field">
+            <label>3) Invert</label>
+            <button class="miniBtn" id="btnInvert">Invert</button>
+            <div class="hint">Ảnh bị ngược đen/trắng thì bấm.</div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="btnProcess">⚙️ Convert ảnh → 192×63</button>
+          <button id="btnGenerate">🧾 Generate lệnh Casio</button>
+          <button id="btnCopy">📋 Copy lệnh</button>
+          <button id="btnClear">🧼 Clear</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Output lệnh</label>
+          <textarea id="output" placeholder="Chưa có lệnh..." spellcheck="false"></textarea>
+          <div class="hint">
+            Quy ước: <span class="mono">[1]</span> tô · <span class="mono">[2]</span> xoá · <span class="mono">[→][←][↑][↓]</span> di chuyển.
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Report</label>
+          <textarea id="report" placeholder="Không có gì để report..." spellcheck="false"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="card">
+      <header>
+        <div class="title">🟦 Preview 192×63</div>
+        <div class="pill" id="status">Chưa load ảnh</div>
+      </header>
+
+      <div class="canvasWrap">
+        <div class="canvasTop">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="kpi" id="kpi1">Size: 192×63</div>
+            <div class="kpi" id="kpi2">Black pixels: 0</div>
+            <div class="kpi" id="kpi3">Threshold: 128</div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="miniBtn" id="btnDownload">Download PNG</button>
+          </div>
+        </div>
+
+        <div class="stage">
+          <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="hint">
+          Tip: Nếu ảnh mất chi tiết → chỉnh threshold.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+// =============================
+//  CASIO PIXEL ART TOOL (MINIMAL)
+//  - 192x63
+//  - grayscale + threshold
+//  - scan row L->R
+//  - output compressed tokens
+// =============================
+
+const W = 192;
+const H = 63;
+
+// DOM
+const elFile = document.getElementById('file');
+const elThreshold = document.getElementById('threshold');
+const elOutput = document.getElementById('output');
+const elReport = document.getElementById('report');
+const elStatus = document.getElementById('status');
+
+const elKpi2 = document.getElementById('kpi2');
+const elKpi3 = document.getElementById('kpi3');
+
+const btnProcess = document.getElementById('btnProcess');
+const btnGenerate = document.getElementById('btnGenerate');
+const btnCopy = document.getElementById('btnCopy');
+const btnClear = document.getElementById('btnClear');
+
+const btnInvert = document.getElementById('btnInvert');
+const btnDownload = document.getElementById('btnDownload');
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// offscreen for processing
+const off = document.createElement('canvas');
+const offCtx = off.getContext('2d', {
+    willReadFrequently: true
+});
+
+// state
+let sourceImg = null;
+
+// binary map: 1 = black pixel, 0 = white pixel
+let bin = Array.from({
+    length: H
+}, () => Array.from({
+    length: W
+}, () => 0));
+
+function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
+}
+
+function setStatus(text) {
+    elStatus.textContent = text;
+}
+
+function clearReport() {
+    elReport.value = "";
+}
+
+function logReport(line) {
+    const prev = elReport.value.trim();
+    elReport.value = prev ? (prev + "\n" + line) : line;
+}
+
+function updateKpis() {
+    const thr = clamp(parseInt(elThreshold.value || '128', 10), 0, 255);
+    elKpi3.textContent = `Threshold: ${thr}`;
+
+    let blacks = 0;
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            if (bin[y][x] === 1) blacks++;
+        }
+    }
+    elKpi2.textContent = `Black pixels: ${blacks}`;
+}
+
+function resizeCanvas() {
+    // minimal: fixed zoom to keep it simple
+    const zoom = 6;
+    canvas.width = W * zoom;
+    canvas.height = H * zoom;
+}
+
+function manhattan(ax, ay, bx, by) {
+    return Math.abs(ax - bx) + Math.abs(ay - by);
+}
+
+function pushMove(tokens, dx, dy) {
+    // dx > 0 => R, dx < 0 => L
+    // dy > 0 => D, dy < 0 => U
+    if (dx > 0) tokens.push(`[→] × ${dx}`);
+    else if (dx < 0) tokens.push(`[←] × ${-dx}`);
+
+    if (dy > 0) tokens.push(`[↓] × ${dy}`);
+    else if (dy < 0) tokens.push(`[↑] × ${-dy}`);
+}
+
+function expandCompressedToken(t) {
+    // input: "[→] × 12" or "[1]"
+    // output: tokens array expanded
+    const m = t.match(/^\s*(\[[^\]]+\])\s*×\s*(\d+)\s*$/);
+    if (m) {
+        const sym = m[1];
+        const n = parseInt(m[2], 10);
+        return Array.from({
+            length: n
+        }, () => sym);
+    }
+    return [t.trim()];
+}
+function compressTokensSmart(tokens){
+  // compress patterns:
+  // 1) pair repeats: [1][→] [1][→] ... => [1 →] × n
+  //    (only if the 2 tokens are different)
+  // 2) single repeats: [→]... => [→] × n
+
+  const out = [];
+  let i = 0;
+
+  function pairKey(a, b){
+    // format pretty: "[1 →]"
+    return `[${a.slice(1,-1)} ${b.slice(1,-1)}]`;
+  }
+
+  while(i < tokens.length){
+
+    // ---- TRY PAIR COMPRESSION ----
+    if(i + 3 < tokens.length){
+      const a = tokens[i];
+      const b = tokens[i+1];
+
+      // IMPORTANT FIX:
+      // Don't compress pairs like [→][→] or [↓][↓]
+      if(a !== b){
+        // count repeats of (a,b)
+        let j = i;
+        let count = 0;
+
+        while(j + 1 < tokens.length && tokens[j] === a && tokens[j+1] === b){
+          count++;
+          j += 2;
+        }
+
+        // only worth it if repeat >= 2
+        if(count >= 2){
+          out.push(`${pairKey(a,b)} × ${count}`);
+          i = j;
+          continue;
+        }
+      }
+    }
+
+    // ---- FALLBACK: SINGLE TOKEN COMPRESSION ----
+    const t = tokens[i];
+    let j = i + 1;
+    while(j < tokens.length && tokens[j] === t) j++;
+    const n = j - i;
+
+    if(n === 1) out.push(t);
+    else out.push(`${t} × ${n}`);
+
+    i = j;
+  }
+
+  return out;
+}
+
+
+
+function wrapTokensToLines(tokens, maxLen = 92) {
+    const lines = [];
+    let current = '';
+
+    for (const t of tokens) {
+        if (!current) {
+            current = t;
+            continue;
+        }
+
+        if ((current.length + 1 + t.length) > maxLen) {
+            lines.push(current);
+            current = t;
+        } else {
+            current += ' ' + t;
+        }
+    }
+
+    if (current) lines.push(current);
+    return lines;
+}
+
+function drawPreview() {
+    const zoom = 6;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // pixels
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            const v = bin[y][x];
+            // preview: black pixels -> white for contrast
+            ctx.fillStyle = v ? '#0b0f14' : '#ffffff';
+            ctx.fillRect(x * zoom, y * zoom, zoom, zoom);
+        }
+    }
+
+    // grid (always ON, minimal)
+    ctx.strokeStyle = 'rgba(255,255,255,.10)';
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x <= W; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * zoom + 0.5, 0);
+        ctx.lineTo(x * zoom + 0.5, H * zoom);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y <= H; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * zoom + 0.5);
+        ctx.lineTo(W * zoom, y * zoom + 0.5);
+        ctx.stroke();
+    }
+}
+
+function readFileAsImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Không load được ảnh'));
+            img.src = reader.result;
+        };
+        reader.onerror = () => reject(new Error('Không đọc được file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+function processImage(img) {
+    off.width = W;
+    off.height = H;
+
+    offCtx.clearRect(0, 0, W, H);
+
+    // background white
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, W, H);
+
+    // aspect-fit
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+
+    if (!iw || !ih) throw new Error('Ảnh có kích thước không hợp lệ');
+
+    const scale = Math.min(W / iw, H / ih);
+    const dw = Math.max(1, Math.floor(iw * scale));
+    const dh = Math.max(1, Math.floor(ih * scale));
+    const dx = Math.floor((W - dw) / 2);
+    const dy = Math.floor((H - dh) / 2);
+
+    offCtx.imageSmoothingEnabled = true;
+    offCtx.drawImage(img, 0, 0, iw, ih, dx, dy, dw, dh);
+
+    // grayscale + threshold
+    const thr = clamp(parseInt(elThreshold.value || '128', 10), 0, 255);
+
+    const imageData = offCtx.getImageData(0, 0, W, H);
+    const data = imageData.data;
+
+    let blacks = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+        const isBlack = gray < thr;
+
+        const idx = i / 4;
+        const x = idx % W;
+        const y = Math.floor(idx / W);
+
+        bin[y][x] = isBlack ? 1 : 0;
+        if (isBlack) blacks++;
+
+        const out = isBlack ? 0 : 255;
+        data[i] = out;
+        data[i + 1] = out;
+        data[i + 2] = out;
+        data[i + 3] = 255;
+    }
+
+    offCtx.putImageData(imageData, 0, 0);
+
+    updateKpis();
+    drawPreview();
+    setStatus(`Đã convert · black=${blacks}`);
+
+    if (blacks === 0) logReport('⚠️ Ảnh ra toàn trắng. Thử tăng threshold hoặc invert.');
+    if (blacks >= W * H * 0.92) logReport('⚠️ Ảnh ra gần như toàn đen. Thử giảm threshold.');
+}
+
+function invertBin() {
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            bin[y][x] = bin[y][x] ? 0 : 1;
+        }
+    }
+    updateKpis();
+    drawPreview();
+    setStatus('Đã invert');
+}
+
+function token(dir) {
+    const map = {
+        U: '↑',
+        D: '↓',
+        L: '←',
+        R: '→'
+    };
+    return `[${map[dir]}]`;
+}
+
+function compressTokens(tokens) {
+    const out = [];
+    let i = 0;
+    while (i < tokens.length) {
+        const t = tokens[i];
+        let j = i + 1;
+        while (j < tokens.length && tokens[j] === t) j++;
+        const n = j - i;
+        if (n === 1) out.push(t);
+        else out.push(`${t} × ${n}`);
+        i = j;
+    }
+    return out;
+}
+
+function generateCommands() {
+    clearReport();
+
+    if (!sourceImg) {
+        logReport('❌ Chưa có ảnh. Chọn ảnh rồi bấm Convert.');
+        return '';
+    }
+
+    // Build list of black pixels
+    const points = [];
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            if (bin[y][x] === 1) points.push({
+                x,
+                y
+            });
+        }
+    }
+
+    if (points.length === 0) {
+        logReport('⚠️ Không có pixel đen. Thử threshold hoặc invert.');
+        setStatus('Không có gì để generate');
+        return '';
+    }
+
+    // Nearest Neighbor path:
+    // Start at (0,0), always go to closest black pixel
+    // Move -> draw [1]
+    const tokens = [];
+
+    let cx = 0;
+    let cy = 0;
+
+    let drawn = 0;
+    let totalMove = 0;
+
+    // We will remove visited points by swapping with last (fast)
+    while (points.length > 0) {
+        // find nearest
+        let bestIndex = 0;
+        let bestDist = Infinity;
+
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            const d = manhattan(cx, cy, p.x, p.y);
+            if (d < bestDist) {
+                bestDist = d;
+                bestIndex = i;
+
+                // micro optimization: if dist=0 -> perfect
+                if (d === 0) break;
+            }
+        }
+
+        const target = points[bestIndex];
+
+        // move to target
+        const dx = target.x - cx;
+        const dy = target.y - cy;
+
+        totalMove += Math.abs(dx) + Math.abs(dy);
+
+        // push movement as repeated tokens for later compression
+        if (dx > 0) {
+            for (let i = 0; i < dx; i++) tokens.push('[→]');
+        } else if (dx < 0) {
+            for (let i = 0; i < -dx; i++) tokens.push('[←]');
+        }
+
+        if (dy > 0) {
+            for (let i = 0; i < dy; i++) tokens.push('[↓]');
+        } else if (dy < 0) {
+            for (let i = 0; i < -dy; i++) tokens.push('[↑]');
+        }
+
+        // draw
+        tokens.push('[1]');
+        drawn++;
+
+        // update cursor
+        cx = target.x;
+        cy = target.y;
+
+        // remove point from list
+        points[bestIndex] = points[points.length - 1];
+        points.pop();
+    }
+
+    // compress
+    const compressed = compressTokensSmart(tokens);
+
+    // wrap lines
+    const lines = wrapTokensToLines(compressed, 92);
+
+    logReport(`ℹ️ Mode: Nearest Neighbor (pixel cluster path)`);
+    logReport(`ℹ️ Drawn pixels: ${drawn}`);
+    logReport(`ℹ️ Total moves (raw): ${totalMove}`);
+    logReport(`ℹ️ Token count (raw): ${tokens.length}`);
+    logReport(`ℹ️ Token count (compressed): ${compressed.length}`);
+
+    setStatus('Đã generate lệnh (NN)');
+    return lines.join('\n');
+}
+
+
+function downloadPreview() {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const cctx = c.getContext('2d');
+
+    const imgData = cctx.createImageData(W, H);
+    const d = imgData.data;
+
+    for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4;
+            const v = bin[y][x];
+            const out = v ? 0 : 255;
+            d[i] = out;
+            d[i + 1] = out;
+            d[i + 2] = out;
+            d[i + 3] = 255;
+        }
+    }
+
+    cctx.putImageData(imgData, 0, 0);
+
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'casio_192x63.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+// EVENTS
+elFile.addEventListener('change', async () => {
+    clearReport();
+    elOutput.value = '';
+
+    const file = elFile.files && elFile.files[0];
+    if (!file) {
+        sourceImg = null;
+        setStatus('Chưa load ảnh');
+        return;
+    }
+
+    try {
+        setStatus('Đang load ảnh...');
+        const img = await readFileAsImage(file);
+        sourceImg = img;
+        setStatus('Ảnh đã load · bấm Convert');
+        logReport('✅ Load ảnh thành công.');
+    } catch (e) {
+        sourceImg = null;
+        setStatus('Load ảnh thất bại');
+        logReport('❌ ' + e.message);
+    }
+});
+
+elThreshold.addEventListener('input', () => {
+    if (sourceImg) {
+        clearReport();
+        elOutput.value = '';
+        try {
+            processImage(sourceImg);
+        } catch (e) {
+            logReport('❌ ' + e.message);
+        }
+    }
+});
+
+btnProcess.addEventListener('click', () => {
+    clearReport();
+    elOutput.value = '';
+    if (!sourceImg) {
+        logReport('❌ Chưa có ảnh.');
+        return;
+    }
+    try {
+        processImage(sourceImg);
+        logReport('✅ Convert xong.');
+    } catch (e) {
+        logReport('❌ ' + e.message);
+    }
+});
+
+btnInvert.addEventListener('click', () => {
+    clearReport();
+    if (!sourceImg) {
+        logReport('❌ Chưa có ảnh để invert.');
+        return;
+    }
+    invertBin();
+    logReport('✅ Invert xong.');
+});
+
+btnGenerate.addEventListener('click', () => {
+    const text = generateCommands();
+    if (text) elOutput.value = text;
+});
+
+btnCopy.addEventListener('click', async () => {
+    const t = elOutput.value.trim();
+    if (!t) {
+        clearReport();
+        logReport('❌ Không có gì để copy.');
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(t);
+        clearReport();
+        logReport('✅ Copy thành công.');
+    } catch (e) {
+        clearReport();
+        logReport('❌ Copy thất bại (trình duyệt chặn clipboard).');
+    }
+});
+
+btnClear.addEventListener('click', () => {
+    clearReport();
+    elOutput.value = '';
+    bin = Array.from({
+        length: H
+    }, () => Array.from({
+        length: W
+    }, () => 0));
+    updateKpis();
+    drawPreview();
+    setStatus('Đã clear');
+    logReport('ℹ️ Reset xong.');
+});
+
+btnDownload.addEventListener('click', () => {
+    clearReport();
+    if (!sourceImg) {
+        logReport('❌ Chưa có ảnh để download.');
+        return;
+    }
+    downloadPreview();
+    logReport('✅ Đã download PNG 192×63.');
+});
+
+// init
+resizeCanvas();
+updateKpis();
+drawPreview();
+setStatus('Chưa load ảnh');
+</script>
+</body>
+</html>
