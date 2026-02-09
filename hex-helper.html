@@ -534,23 +534,31 @@ function mergeHexParts(parts){
 
 function toHexListFromInput(userInput){
   const parts = splitInput(userInput);
-  const merged = mergeHexParts(parts);
 
-  // giống python: reverse_hex_char.get(part, reverse_hex_token.get(part, part))
+  // CHỈ merge khi input là hex (vì mergeHexParts upper-case)
+  const isHexParts = parts.length > 0 && parts.every(p => /^[0-9A-Fa-f]+$/.test(p));
+
+  const merged = isHexParts ? mergeHexParts(parts) : parts;
+
   const hexList = merged.map(part => {
-    const up = (part ?? "").toUpperCase();
+    // 1) Nếu là char -> tra reverse char trước (KHÔNG upper-case)
     const fromChar = reverse_hex_char[part];
     if(fromChar) return fromChar.toUpperCase();
 
+    // 2) Nếu là token -> tra token (token có thể là "Ans", "𝒙", ...)
     const fromToken = reverse_hex_token[part];
     if(fromToken) return fromToken.toUpperCase();
 
-    // nếu nó đã là hex thì giữ nguyên
-    return up;
+    // 3) Nếu là hex -> upper-case để chuẩn hoá
+    if(/^[0-9A-Fa-f]+$/.test(part)) return part.toUpperCase();
+
+    // 4) fallback
+    return String(part);
   });
 
   return hexList;
 }
+
 
 function computeHexCanGan(hexList){
   // “cần gán” = không có trong cong_thuc1 và không phải space
