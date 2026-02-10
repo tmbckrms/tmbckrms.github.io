@@ -611,6 +611,65 @@ function wrapTokensToLines(tokens, maxLen = 92) {
     return lines;
 }
 
+function forceNewlineEvery3Down(linesText){
+  // Input: string (already wrapped lines)
+  // Output: string with forced newlines every 3 [↓]
+
+  const rawTokens = linesText
+    .split(/\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const outLines = [];
+  let currentLine = [];
+
+  let downCounter = 0;
+
+  function flushLine(){
+    if(currentLine.length){
+      outLines.push(currentLine.join(' '));
+      currentLine = [];
+    }
+  }
+
+  for(const tok of rawTokens){
+
+    // detect "[↓]" or "[↓] × n"
+    const m = tok.match(/^\[↓\](?:\s*×\s*(\d+))?$/);
+
+    if(m){
+      const n = m[1] ? parseInt(m[1], 10) : 1;
+
+      // We need to split this token if it crosses multiple groups of 3
+      let remain = n;
+
+      while(remain > 0){
+        const need = 3 - downCounter;
+        const take = Math.min(need, remain);
+
+        if(take === 1) currentLine.push(`[↓]`);
+        else currentLine.push(`[↓] × ${take}`);
+
+        downCounter += take;
+        remain -= take;
+
+        if(downCounter >= 3){
+          flushLine();
+          downCounter = 0;
+        }
+      }
+
+      continue;
+    }
+
+    // normal token
+    currentLine.push(tok);
+  }
+
+  flushLine();
+  return outLines.join('\n');
+}
+
 function drawPreview() {
     const zoom = 6;
 
@@ -884,6 +943,7 @@ function generateCommands() {
 
     // wrap lines
     const lines = wrapTokensToLines(compressed, 92);
+    const text = lines.join('\n');
 
     logReport(`ℹ️ Mode: Nearest Neighbor (pixel cluster path)`);
     logReport(`ℹ️ Drawn pixels: ${drawn}`);
@@ -892,7 +952,7 @@ function generateCommands() {
     logReport(`ℹ️ Token count (compressed): ${compressed.length}`);
 
     setStatus('Đã generate lệnh (NN)');
-    return lines.join('\n');
+    return forceNewlineEvery3Down(text);
 }
 
 
