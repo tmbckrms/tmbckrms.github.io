@@ -5,295 +5,331 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hex Helper</title>
   <style>
-    :root{
-      --bg:#0b0f14;
-      --panel:#121a22;
-      --panel2:#0f1620;
-      --text:#e9f1ff;
-      --muted:#9fb3c8;
-      --line:#233243;
-      --accent:#59a6ff;
-      --danger:#ff5d5d;
-      --ok:#6dff9b;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
+:root {
+   --bg: #0b0f14;
+   --panel: #121a22;
+   --panel2: #0f1620;
+   --text: #e9f1ff;
+   --muted: #9fb3c8;
+   --line: #233243;
+   --accent: #59a6ff;
+   --danger: #ff5d5d;
+   --ok: #6dff9b;
+   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+   --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-    body{
-      margin:0;
-      background:linear-gradient(180deg, #070a0f 0%, #0b0f14 100%);
-      color:var(--text);
-      font-family:var(--sans);
-      min-height:100vh;
-      padding:24px;
-    }
+body {
+   margin: 0;
+   background: linear-gradient(180deg, #070a0f 0%, #0b0f14 100%);
+   color: var(--text);
+   font-family: var(--sans);
+   min-height: 100vh;
+   padding: 24px;
+}
 
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      display:grid;
-      gap:16px;
-    }
+.wrap {
+   max-width: 1100px;
+   margin: 0 auto;
+   display: grid;
+   gap: 16px;
+}
 
-    .title{
-      background:rgba(18,26,34,.7);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:18px 18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
+.title {
+   background: rgba(18, 26, 34, .7);
+   border: 1px solid var(--line);
+   border-radius: 18px;
+   padding: 18px 18px;
+   box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
 
-    .title h1{
-      margin:0;
-      font-size:20px;
-      letter-spacing:.2px;
-    }
-    .title p{
-      margin:6px 0 0 0;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.4;
-    }
+.title h1 {
+   margin: 0;
+   font-size: 20px;
+   letter-spacing: .2px;
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap:16px;
-    }
+.title p {
+   margin: 6px 0 0 0;
+   color: var(--muted);
+   font-size: 14px;
+   line-height: 1.4;
+}
 
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+.grid {
+   display: grid;
+   grid-template-columns: 1.2fr .8fr;
+   gap: 16px;
+}
 
-    .card{
-      background:rgba(18,26,34,.65);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
+@media (max-width: 980px) {
+   .grid {
+      grid-template-columns: 1fr;
+   }
+}
 
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+.card {
+   background: rgba(18, 26, 34, .65);
+   border: 1px solid var(--line);
+   border-radius: 18px;
+   padding: 16px;
+   box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
 
-    label{
-      font-size:13px;
-      color:var(--muted);
-    }
+.row {
+   display: flex;
+   gap: 10px;
+   flex-wrap: wrap;
+   align-items: center;
+}
 
-    select, textarea, input{
-      background:var(--panel2);
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius:14px;
-      padding:10px 12px;
-      outline:none;
-      font-family:var(--sans);
-    }
+label {
+   font-size: 13px;
+   color: var(--muted);
+}
 
-    select:focus, textarea:focus, input:focus{
-      border-color:rgba(89,166,255,.6);
-      box-shadow:0 0 0 3px rgba(89,166,255,.12);
-    }
+select,
+textarea,
+input {
+   background: var(--panel2);
+   border: 1px solid var(--line);
+   color: var(--text);
+   border-radius: 14px;
+   padding: 10px 12px;
+   outline: none;
+   font-family: var(--sans);
+}
 
-    textarea{
-      width:100%;
-      min-height:140px;
-      resize:vertical;
-      font-family:var(--mono);
-      font-size:14px;
-      line-height:1.45;
-    }
+select:focus,
+textarea:focus,
+input:focus {
+   border-color: rgba(89, 166, 255, .6);
+   box-shadow: 0 0 0 3px rgba(89, 166, 255, .12);
+}
 
-    button{
-      border:none;
-      background:linear-gradient(180deg, #4f9cff 0%, #2e7cff 100%);
-      color:#061018;
-      padding:10px 14px;
-      border-radius:14px;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .05s ease;
-    }
+textarea {
+   width: 100%;
+   min-height: 140px;
+   resize: vertical;
+   font-family: var(--mono);
+   font-size: 14px;
+   line-height: 1.45;
+}
 
-    button:active{ transform:scale(.98); }
+button {
+   border: none;
+   background: linear-gradient(180deg, #4f9cff 0%, #2e7cff 100%);
+   color: #061018;
+   padding: 10px 14px;
+   border-radius: 14px;
+   font-weight: 700;
+   cursor: pointer;
+   transition: transform .05s ease;
+}
 
-    .btn2{
-      background:transparent;
-      border:1px solid var(--line);
-      color:var(--text);
-      font-weight:600;
-    }
+button:active {
+   transform: scale(.98);
+}
 
-    .pill{
-      font-family:var(--mono);
-      font-size:12px;
-      color:var(--muted);
-      padding:6px 10px;
-      border:1px solid var(--line);
-      border-radius:999px;
-      background:rgba(0,0,0,.2);
-    }
+.btn2 {
+   background: transparent;
+   border: 1px solid var(--line);
+   color: var(--text);
+   font-weight: 600;
+}
 
-    .out{
-      font-family:var(--mono);
-      font-size:14px;
-      line-height:1.55;
-      white-space:pre-wrap;
-      background:rgba(0,0,0,.25);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      min-height:120px;
-    }
+.pill {
+   font-family: var(--mono);
+   font-size: 12px;
+   color: var(--muted);
+   padding: 6px 10px;
+   border: 1px solid var(--line);
+   border-radius: 999px;
+   background: rgba(0, 0, 0, .2);
+}
 
-    .hint{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.4;
-      margin-top:10px;
-    }
+.out {
+   font-family: var(--mono);
+   font-size: 14px;
+   line-height: 1.55;
+   white-space: pre-wrap;
+   background: rgba(0, 0, 0, .25);
+   border: 1px solid var(--line);
+   border-radius: 16px;
+   padding: 12px;
+   min-height: 120px;
+}
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-family:var(--mono);
-      font-size:13px;
-      overflow:hidden;
-      border-radius:14px;
-    }
+.hint {
+   color: var(--muted);
+   font-size: 13px;
+   line-height: 1.4;
+   margin-top: 10px;
+}
 
-    th, td{
-      border-bottom:1px solid rgba(35,50,67,.6);
-      padding:10px 10px;
-      vertical-align:top;
-    }
+table {
+   width: 100%;
+   border-collapse: collapse;
+   font-family: var(--mono);
+   font-size: 13px;
+   overflow: hidden;
+   border-radius: 14px;
+}
 
-    th{
-      text-align:left;
-      color:var(--muted);
-      font-weight:700;
-      background:rgba(0,0,0,.15);
-    }
+th,
+td {
+   border-bottom: 1px solid rgba(35, 50, 67, .6);
+   padding: 10px 10px;
+   vertical-align: top;
+}
 
-    .bad{ color:var(--danger); }
-    .ok{ color:var(--ok); }
+th {
+   text-align: left;
+   color: var(--muted);
+   font-weight: 700;
+   background: rgba(0, 0, 0, .15);
+}
 
-    .footer{
-      color:var(--muted);
-      font-size:13px;
-      text-align:center;
-      padding:6px 0 2px;
-    }
+.bad {
+   color: var(--danger);
+}
 
-    .mini{
-      font-size:12px;
-      color:var(--muted);
-    }
+.ok {
+   color: var(--ok);
+}
+
+.footer {
+   color: var(--muted);
+   font-size: 13px;
+   text-align: center;
+   padding: 6px 0 2px;
+}
+
+.mini {
+   font-size: 12px;
+   color: var(--muted);
+}
+
+.optional-header {
+   cursor: pointer;
+   font-weight: 700;
+   padding: 10px;
+   border-radius: 12px;
+   background: rgba(0, 0, 0, .25);
+   border: 1px solid var(--line);
+   user-select: none;
+}
+
+.optional-header:hover {
+   background: rgba(0, 0, 0, .35);
+}
+
+.optional-content {
+   max-height: 0;
+   overflow: hidden;
+   transition: max-height .35s ease;
+   margin-top: 10px;
+}
+
+.optional-content.open {
+   max-height: 500px;
+}
   </style>
 </head>
 <body>
-  <div class="wrap">
-
-    <div class="title">
-      <h1>🔹 Hex Helper 🔹</h1>
-      <p>
-        Tool chuyển đổi <b>Hex ↔ Char ↔ Token</b>.  
-        Có hỗ trợ mã dạng <b>F4xx</b>, <b>FDxx</b>.
-    </div>
-
-    <div class="grid">
+   <div class="wrap">
+      <div class="title">
+         <h1>🔹 Hex Helper 🔹</h1>
+         <p>
+            Tool chuyển đổi <b>Hex ↔ Char ↔ Token</b>.  
+            Có hỗ trợ mã dạng <b>F4xx</b>, <b>FDxx</b>.
+      </div>
+      <div class="grid">
+         <div class="card">
+            <div class="row">
+               <label>⚡ Chọn chức năng:</label>
+               <select id="mode">
+                  <option value="1">1️⃣ Hex ↔ Char</option>
+                  <option value="2">2️⃣ Hex → Token</option>
+                  <option value="3">3️⃣ Tổng quát Hex ↔ Char ↔ Token</option>
+                  <option value="4">4️⃣ Bảng Ký Tự (Tra cứu)</option>
+               </select>
+               <span class="pill" id="status">Ready</span>
+            </div>
+            <div style="height:12px"></div>
+            <label>🔍 Nhập dữ liệu (hex có thể có hoặc không có dấu cách):</label>
+            <textarea id="input" placeholder="Ví dụ:
+               F4 7B
+               F47B
+               "></textarea>
+            <div style="height:12px"></div>
+            <div class="row">
+               <button id="btnRun">Dịch</button>
+               <button class="btn2" id="btnClear">Xoá</button>
+               <button class="btn2" id="btnCopy">Copy kết quả</button>
+            </div>
+            <div class="hint">
+               Tip:  
+               - Nhập hex: <code>F47B</code> hoặc <code>F4 7B</code> đều được.  
+               - Nhập char: ví dụ <code>ẻ</code>, <code>á</code>, <code>∫</code>.  
+               - Token là bảng riêng (hex_token).
+            </div>
+         </div>
+         <div class="card">
+            <div class="row" style="justify-content:space-between;">
+               <div>
+                  <div class="mini">📌 Output</div>
+                  <div class="mini">Kết quả hiển thị theo mode đã chọn</div>
+               </div>
+            </div>
+            <div style="height:10px"></div>
+            <div id="output" class="out">...</div>
+         </div>
+      </div>
       <div class="card">
-        <div class="row">
-          <label>⚡ Chọn chức năng:</label>
-          <select id="mode">
-            <option value="1">1️⃣ Hex ↔ Char</option>
-            <option value="2">2️⃣ Hex → Token</option>
-            <option value="3">3️⃣ Tổng quát Hex ↔ Char ↔ Token</option>
-            <option value="4">4️⃣ Bảng Ký Tự (Tra cứu)</option>
-          </select>
-
-          <span class="pill" id="status">Ready</span>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <label>🔍 Nhập dữ liệu (hex có thể có hoặc không có dấu cách):</label>
-        <textarea id="input" placeholder="Ví dụ:
-F4 7B
-F47B
-"></textarea>
-
-        <div style="height:12px"></div>
-
-        <div class="row">
-          <button id="btnRun">Dịch</button>
-          <button class="btn2" id="btnClear">Xoá</button>
-          <button class="btn2" id="btnCopy">Copy kết quả</button>
-        </div>
-
-        <div class="hint">
-          Tip:  
-          - Nhập hex: <code>F47B</code> hoặc <code>F4 7B</code> đều được.  
-          - Nhập char: ví dụ <code>ẻ</code>, <code>á</code>, <code>∫</code>.  
-          - Token là bảng riêng (hex_token).
-        </div>
+         <div class="row" style="justify-content:space-between;">
+            <div>
+               <div class="mini">📜 Bảng tra cứu</div>
+               <div class="mini">Chỉ hiện khi mode = 4</div>
+            </div>
+         </div>
+         <div style="height:10px"></div>
+         <div id="tableWrap" style="display:none;">
+            <table>
+               <thead>
+                  <tr>
+                     <th style="width:90px;">Hex</th>
+                     <th style="width:80px;">Char</th>
+                     <th style="width:110px;">Token</th>
+                     <th style="width:260px;">Công thức 1</th>
+                     <th>Công thức 2</th>
+                  </tr>
+               </thead>
+               <tbody id="tbody"></tbody>
+            </table>
+         </div>
+         <div id="tableHint" class="hint">
+            Mode 4 sẽ show bảng ở đây.
+         </div>
       </div>
-
       <div class="card">
-        <div class="row" style="justify-content:space-between;">
-          <div>
-            <div class="mini">📌 Output</div>
-            <div class="mini">Kết quả hiển thị theo mode đã chọn</div>
-          </div>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div id="output" class="out">...</div>
+         <div class="optional-header" id="optionalToggle">
+            <span>▶ Optional</span>
+         </div>
+         <div class="optional-content" id="optionalContent">
+            <div class="row" style="justify-content:space-between;">
+               <div class="mini">🕘 Lịch sử xem</div>
+               <button class="btn2" id="clearHistory">Xoá lịch sử</button>
+            </div>
+            <div style="height:10px"></div>
+            <div id="historyList" class="out" style="min-height:80px;"></div>
+         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div>
-          <div class="mini">📜 Bảng tra cứu</div>
-          <div class="mini">Chỉ hiện khi mode = 4</div>
-        </div>
+      <div class="footer">
+         <p>💡 Development: Quốc Thắng • TikTok: @qtwqa</p>
+         <p>🔹 HTML: @truongmebackrooms (discord)</p>
       </div>
-
-      <div style="height:10px"></div>
-
-      <div id="tableWrap" style="display:none;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:90px;">Hex</th>
-              <th style="width:80px;">Char</th>
-              <th style="width:110px;">Token</th>
-              <th style="width:260px;">Công thức 1</th>
-              <th>Công thức 2</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-
-      <div id="tableHint" class="hint">
-        Mode 4 sẽ show bảng ở đây.
-      </div>
-    </div>
-
-    <div class="footer">
-      <p>💡 Development: Quốc Thắng • TikTok: @qtwqa</p>
-      <p>🔹 HTML: @truongmebackrooms (discord)</p>
-    </div>
-
-  </div>
+   </div>
 
 <script>
 /* ==============================
@@ -698,6 +734,9 @@ function run(){
         `- Ký tự Char: ${charList.join("")}`,
         hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
       ].filter(Boolean));
+      saveHistory(`Mode ${mode}
+      Input: ${userInput}
+      Hex: ${hexList.join(" ")}`);
 
       elTableWrap.style.display = "none";
       elTableHint.style.display = "block";
@@ -713,6 +752,9 @@ function run(){
         `- Token: ${tokenList.join(" ")}`,
         hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
       ].filter(Boolean));
+      saveHistory(`Mode ${mode}
+      Input: ${userInput}
+      Hex: ${hexList.join(" ")}`);
 
       elTableWrap.style.display = "none";
       elTableHint.style.display = "block";
@@ -730,6 +772,9 @@ function run(){
         `- Token: ${tokenList.join(" ")}`,
         hexCanGan.length ? `- Hex cần gán: ${hexCanGan.join(" ")}` : ""
       ].filter(Boolean));
+      saveHistory(`Mode ${mode}
+      Input: ${userInput}
+      Hex: ${hexList.join(" ")}`);
 
       elTableWrap.style.display = "none";
       elTableHint.style.display = "block";
@@ -746,6 +791,55 @@ function run(){
     elTableHint.style.display = "block";
   }
 }
+
+/* ==============================
+   Optional - Collapsible
+============================== */
+
+const optionalToggle = document.getElementById("optionalToggle");
+const optionalContent = document.getElementById("optionalContent");
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistory");
+
+optionalToggle.addEventListener("click", () => {
+  optionalContent.classList.toggle("open");
+
+  optionalToggle.innerHTML = optionalContent.classList.contains("open")
+    ? "▼ Optional"
+    : "▶ Optional";
+});
+
+/* ==============================
+   History System
+============================== */
+
+function loadHistory(){
+  const data = JSON.parse(localStorage.getItem("hex_history") || "[]");
+  if(data.length === 0){
+    historyList.textContent = "(Chưa có lịch sử)";
+    return;
+  }
+
+  historyList.textContent = data.join("\n\n");
+}
+
+function saveHistory(entry){
+  let data = JSON.parse(localStorage.getItem("hex_history") || "[]");
+
+  data.unshift(entry); // thêm lên đầu
+
+  if(data.length > 20) data.pop(); // giới hạn 20 dòng
+
+  localStorage.setItem("hex_history", JSON.stringify(data));
+  loadHistory();
+}
+
+clearHistoryBtn.addEventListener("click", () => {
+  localStorage.removeItem("hex_history");
+  loadHistory();
+});
+
+loadHistory();
 
 document.getElementById("btnRun").addEventListener("click", run);
 
