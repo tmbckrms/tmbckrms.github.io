@@ -2,27 +2,26 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Xem M3U8 bằng Link</title>
+    <title>M3U8 Player - Debug Mode</title>
 
-    <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
         body {
-            background-color: #111;
+            background-color: #0f0f0f;
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 30px;
+            padding: 20px;
         }
 
         h1 {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        input {
+        input[type="text"] {
             width: 80%;
-            max-width: 600px;
+            max-width: 700px;
             padding: 10px;
             border-radius: 8px;
             border: none;
@@ -30,8 +29,9 @@
         }
 
         button {
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
             font-weight: bold;
@@ -41,79 +41,166 @@
             width: 90%;
             max-width: 900px;
             margin-top: 20px;
+            background: black;
             border-radius: 10px;
-            background-color: black;
         }
 
         .status {
             margin-top: 10px;
-            color: #00ff88;
+            font-weight: bold;
         }
 
-        .error {
-            color: red;
+        .log {
+            text-align: left;
+            background: #1b1b1b;
+            padding: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 13px;
+            border-radius: 8px;
         }
+
+        .error { color: #ff4c4c; }
+        .success { color: #00ff88; }
+        .info { color: #00c8ff; }
     </style>
 </head>
 <body>
 
-    <h1>📺 Trình phát M3U8 (Nhập Link)</h1>
+<h1>🎬 M3U8 Player (Debug Mode)</h1>
 
-    <input type="text" id="m3u8Input" placeholder="Dán link .m3u8 vào đây...">
-    <br>
-    <button onclick="loadVideo()">Phát Video</button>
+<input type="text" id="m3u8Input" placeholder="Dán link .m3u8 vào đây...">
 
-    <br>
-    <video id="videoPlayer" controls></video>
+<br>
 
-    <div id="status" class="status"></div>
+<button onclick="loadVideo()">Phát</button>
+<button onclick="toggleProxy()">Bật/Tắt Proxy</button>
+<button onclick="clearLog()">Xoá Log</button>
 
-    <script>
-        const video = document.getElementById("videoPlayer");
-        const statusText = document.getElementById("status");
+<video id="videoPlayer" controls></video>
 
-        function loadVideo() {
+<div id="status" class="status"></div>
+<div id="logBox" class="log"></div>
 
-            const url = document.getElementById("m3u8Input").value.trim();
+<script>
+    const video = document.getElementById("videoPlayer");
+    const statusText = document.getElementById("status");
+    const logBox = document.getElementById("logBox");
+    const input = document.getElementById("m3u8Input");
 
-            if (!url) {
-                statusText.innerText = "Bạn chưa nhập link!";
-                statusText.className = "error";
-                return;
-            }
+    let hls;
+    let useProxy = false;
 
-            statusText.className = "status";
-            statusText.innerText = "Đang tải...";
+    const proxyURL = "https://corsproxy.io/?";
 
-            if (Hls.isSupported()) {
+    function log(message, type = "info") {
+        const line = document.createElement("div");
+        line.className = type;
+        line.textContent = "[" + new Date().toLocaleTimeString() + "] " + message;
+        logBox.appendChild(line);
+        logBox.scrollTop = logBox.scrollHeight;
+        console.log(message);
+    }
 
-                const hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(video);
+    function clearLog() {
+        logBox.innerHTML = "";
+    }
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    statusText.innerText = "Tải thành công! Nhấn Play để xem.";
-                });
+    function toggleProxy() {
+        useProxy = !useProxy;
+        log("Proxy: " + (useProxy ? "ON" : "OFF"), "info");
+    }
 
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    statusText.innerText = "Lỗi: " + data.type;
-                    statusText.className = "error";
-                });
+    function loadVideo() {
 
-            } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-
-                video.src = url;
-                video.addEventListener("loadedmetadata", function() {
-                    statusText.innerText = "Tải thành công!";
-                });
-
-            } else {
-
-                statusText.innerText = "Trình duyệt không hỗ trợ HLS.";
-                statusText.className = "error";
-            }
+        const rawURL = input.value.trim();
+        if (!rawURL) {
+            statusText.textContent = "Chưa nhập link!";
+            statusText.className = "status error";
+            return;
         }
-    </script>
+
+        let finalURL = rawURL;
+        if (useProxy) {
+            finalURL = proxyURL + rawURL;
+        }
+
+        log("Loading: " + finalURL, "info");
+
+        if (hls) {
+            hls.destroy();
+        }
+
+        if (Hls.isSupported()) {
+
+            hls = new Hls({
+                debug: false,
+                enableWorker: true,
+                lowLatencyMode: true
+            });
+
+            hls.loadSource(finalURL);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                statusText.textContent = "Manifest loaded ✔";
+                statusText.className = "status success";
+                log("Manifest parsed successfully", "success");
+                video.play();
+            });
+
+            hls.on(Hls.Events.ERROR, function(event, data) {
+
+                log("Error Type: " + data.type, "error");
+                log("Error Details: " + data.details, "error");
+                log("Fatal: " + data.fatal, "error");
+
+                if (data.fatal) {
+
+                    switch(data.type) {
+
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            log("Trying to recover network error...", "info");
+                            hls.startLoad();
+                            break;
+
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            log("Trying to recover media error...", "info");
+                            hls.recoverMediaError();
+                            break;
+
+                        default:
+                            log("Destroying HLS instance", "error");
+                            hls.destroy();
+                            break;
+                    }
+                }
+            });
+
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+
+            video.src = finalURL;
+            video.addEventListener("loadedmetadata", function() {
+                statusText.textContent = "Loaded via native HLS ✔";
+                statusText.className = "status success";
+                video.play();
+            });
+
+        } else {
+
+            statusText.textContent = "Browser không hỗ trợ HLS.";
+            statusText.className = "status error";
+        }
+    }
+
+    input.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            loadVideo();
+        }
+    });
+
+</script>
 
 </body>
 </html>
