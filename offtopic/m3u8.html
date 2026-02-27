@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xem M3U8 bằng Link</title>
+
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 80%;
+            max-width: 600px;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        video {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 20px;
+            border-radius: 10px;
+            background-color: black;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: #00ff88;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📺 Trình phát M3U8 (Nhập Link)</h1>
+
+    <input type="text" id="m3u8Input" placeholder="Dán link .m3u8 vào đây...">
+    <br>
+    <button onclick="loadVideo()">Phát Video</button>
+
+    <br>
+    <video id="videoPlayer" controls></video>
+
+    <div id="status" class="status"></div>
+
+    <script>
+        const video = document.getElementById("videoPlayer");
+        const statusText = document.getElementById("status");
+
+        function loadVideo() {
+
+            const url = document.getElementById("m3u8Input").value.trim();
+
+            if (!url) {
+                statusText.innerText = "Bạn chưa nhập link!";
+                statusText.className = "error";
+                return;
+            }
+
+            statusText.className = "status";
+            statusText.innerText = "Đang tải...";
+
+            if (Hls.isSupported()) {
+
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    statusText.innerText = "Tải thành công! Nhấn Play để xem.";
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    statusText.innerText = "Lỗi: " + data.type;
+                    statusText.className = "error";
+                });
+
+            } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+
+                video.src = url;
+                video.addEventListener("loadedmetadata", function() {
+                    statusText.innerText = "Tải thành công!";
+                });
+
+            } else {
+
+                statusText.innerText = "Trình duyệt không hỗ trợ HLS.";
+                statusText.className = "error";
+            }
+        }
+    </script>
+
+</body>
+</html>
