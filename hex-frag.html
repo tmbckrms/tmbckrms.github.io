@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex Frag</title>
+    <style>
+        :root {
+            --bg: #070b10;
+            --panel: #0b1220;
+            --line: #1e2a3a;
+            --text: #e8eef8;
+            --muted: #9db0cc;
+            --good: #2dd4bf;
+            --warn: #fbbf24;
+            --bad: #fb7185;
+            --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: radial-gradient(1000px 600px at 15% 10%, rgba(45, 212, 191, 0.12), transparent 60%),
+                        radial-gradient(1000px 600px at 85% 20%, rgba(96, 165, 250, 0.1), transparent 60%),
+                        var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .wrap {
+            width: min(1320px, 100%);
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 1100px) {
+            .wrap { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .card header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-weight: 900;
+            letter-spacing: 0.2px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .pill {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            color: var(--good);
+            background: rgba(45, 212, 191, 0.1);
+        }
+
+        .body { padding: 14px 16px; }
+
+        .field { display: grid; gap: 6px; margin-bottom: 12px; }
+
+        label { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.22);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px;
+            outline: none;
+            font-family: var(--mono);
+            font-size: 13px;
+            min-height: 300px;
+            resize: vertical;
+            transition: border-color 0.2s;
+            line-height: 1.6;
+        }
+
+        textarea:focus { border-color: var(--good); }
+
+        button {
+            cursor: pointer;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            color: var(--text);
+            padding: 12px;
+            border-radius: 16px;
+            font-weight: 900;
+            transition: 0.14s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover { transform: translateY(-1px); border-color: var(--muted); background: rgba(255,255,255,0.08); }
+        button:active { transform: translateY(0px); }
+
+        .kpi-row { display: flex; gap: 8px; margin-top: 12px; }
+
+        .kpi {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .hint { color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="card">
+        <header>
+            <div class="title"><span>⚡</span> Hex Frag</div>
+            <div class="pill">Dis: @truongmebackrooms</div>
+        </header>
+        <div class="body">
+            <div class="field">
+                <label>Input Hex Data</label>
+                <textarea id="inputHex" placeholder="Dán chuỗi hex vào đây..."></textarea>
+            </div>
+            
+            <button onclick="processHex()">FRAG & SPACE</button>
+            
+            <div class="kpi-row">
+                <div class="kpi" id="statSize">Bytes: 0</div>
+                <div class="kpi" id="statBlocks">Blocks: 0</div>
+            </div>
+
+            <div class="hint">
+                <strong>Format:</strong><br>
+                • Mỗi hex cách nhau 1 khoảng trắng.<br>
+                • 17 hex / dòng.<br>
+                • 6 dòng / block (cách bởi 1 dòng trống).
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <header>
+            <div class="title"><span>📦</span> Result</div>
+            <button style="width: auto; margin: 0; padding: 5px 15px; font-size: 12px;" onclick="copyResult()">Copy Result</button>
+        </header>
+        <div class="body">
+            <div class="field">
+                <textarea id="outputHex" readonly placeholder="Kết quả..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function processHex() {
+        const input = document.getElementById('inputHex').value;
+        // Làm sạch: Chỉ giữ lại ký tự hex và lowercase
+        let cleanHex = input.replace(/[^0-9A-Fa-f]/g, '').toLowerCase();
+        
+        if (!cleanHex || cleanHex.length < 2) {
+            alert("Dữ liệu không đủ để frag.");
+            return;
+        }
+
+        // Tách thành mảng các byte (mỗi byte 2 ký tự)
+        let bytes = [];
+        for (let i = 0; i < cleanHex.length; i += 2) {
+            bytes.push(cleanHex.substring(i, i + 2));
+        }
+
+        let result = "";
+        let lineCount = 0;
+        let blockCount = 1;
+
+        for (let i = 0; i < bytes.length; i++) {
+            result += bytes[i];
+
+            // Kiểm tra xem có phải cuối dòng không (mỗi 17 hex)
+            if ((i + 1) % 17 === 0 && (i + 1) < bytes.length) {
+                lineCount++;
+                
+                // Kiểm tra xem có phải cuối block không (mỗi 6 dòng)
+                if (lineCount === 6) {
+                    result += "\n\n"; // Xuống dòng tạo block mới
+                    lineCount = 0;
+                    blockCount++;
+                } else {
+                    result += "\n"; // Xuống dòng thường
+                }
+            } else if (i < bytes.length - 1) {
+                result += " "; // Thêm dấu cách giữa các hex
+            }
+        }
+
+        document.getElementById('outputHex').value = result;
+        document.getElementById('statSize').innerText = `Bytes: ${bytes.length}`;
+        document.getElementById('statBlocks').innerText = `Blocks: ${blockCount}`;
+    }
+
+    function copyResult() {
+        const output = document.getElementById('outputHex');
+        if(!output.value) return;
+        output.select();
+        document.execCommand('copy');
+        alert("Đã copy vào clipboard!");
+    }
+</script>
+
+</body>
+</html>
