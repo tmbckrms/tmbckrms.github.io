@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fancy Easter Egg Calculator</title>
+<style>
+/* Default Calculator Theme */
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: #fff;
+    transition: background 0.5s;
+}
+.app-container {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 95%;
+    max-width: 1000px;
+}
+.calculator-panel {
+    flex: 1;
+}
+
+.calculator {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+.easter-panel {
+    width: 320px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.calculator {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    width: 320px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    transition: background 0.5s;
+}
+
+#display {
+    width: 100%;
+    font-size: 1.5em;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+    text-align: right;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transition: background 0.5s, color 0.5s;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 60px;
+    gap: 10px;
+}
+
+.buttons button {
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer;
+    transition: 0.2s, background 0.5s, color 0.5s;
+}
+
+.buttons button:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+#easterEggsButton {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    background: #ff6f61;
+    cursor: pointer;
+    border: none;
+    font-size: 1em;
+    font-weight: bold;
+    color: #fff;
+    transition: background 0.5s, color 0.5s;
+}
+
+#notifier {
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+    min-height: 20px;
+}
+
+.slot-machine {
+    display: flex;
+    justify-content: space-around;
+    font-size: 2em;
+    margin-top: 10px;
+}
+
+/* Peace Theme */
+body.peace-theme {
+    background: linear-gradient(135deg, #143d22, #2f5d3a, #608066);
+    color: #f1f7f3;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+body.peace-theme .calculator {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(10, 30, 15, 0.5);
+}
+
+body.peace-theme #display {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body.peace-theme #display::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body.peace-theme .buttons button {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+body.peace-theme .buttons button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 12px rgba(168, 230, 207, 0.4);
+    transform: translateY(-1px);
+}
+
+body.peace-theme #easterEggsButton {
+    background: #41724e;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 15px rgba(30, 60, 40, 0.3);
+}
+
+body.peace-theme #easterEggsButton:hover {
+    background: #4f875d;
+}
+
+/* Animations Architecture */
+@keyframes gentleBreeze {
+    0% { transform: rotate(-3deg) scale(1); }
+    100% { transform: rotate(4deg) scale(1.05); }
+}
+
+@keyframes naturalGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Easter Egg list styling */
+.easter-egg-list {
+    display: none; /* hidden by default */
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    font-size: 0.95em;
+    color: #fff;
+    text-align: left;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.easter-egg-list.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.easter-egg-item {
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.easter-egg-item.discovered {
+    background: rgba(0, 255, 0, 0.2);
+    color: #bfff00;
+}
+
+.easter-egg-item span.status {
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.egg-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Overlay background */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* hidden state */
+.overlay.hidden {
+    display: none;
+}
+
+/* popup box */
+.overlay-card {
+    width: 350px;
+    max-width: 90%;
+    background: rgba(20,20,30,0.95);
+    padding: 20px;
+    border-radius: 15px;
+    position: relative;
+    color: white;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* close button */
+.close-overlay {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    color: white;
+    cursor: pointer;
+}
+
+.close-overlay:hover {
+    color: red;
+}
+
+.info-icon {
+    cursor: pointer;
+    font-size: 0.9em;
+    opacity: 0.8;
+    transition: 0.2s;
+}
+
+.info-icon:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #00d9ff;
+}
+
+.news-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #111;
+    color: #fff;
+    font-size: 1em;
+    padding: 8px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 2px solid #444;
+    z-index: 1000;
+}
+
+.news-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scrollNews 50s linear infinite;
+}
+
+@keyframes scrollNews {
+    from {
+        transform: translateX(0%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+/* Push calculator down below news bar */
+.calculator {
+    margin-top: 60px;
+}
+@media (max-width: 850px) {
+    .app-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .easter-panel {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .calculator-panel {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+</style>
+</head>
+<body>
+<div class="app-container">
+    <div class="calculator-panel">
+        <div class="calculator">
+            <input type="text" id="display" placeholder="0">
+            <div class="buttons">
+                <button onclick="appendValue('7')">7</button>
+                <button onclick="appendValue('8')">8</button>
+                <button onclick="appendValue('9')">9</button>
+                <button onclick="appendValue('/')">/</button>
+                <button onclick="appendValue('4')">4</button>
+                <button onclick="appendValue('5')">5</button>
+                <button onclick="appendValue('6')">6</button>
+                <button onclick="appendValue('*')">*</button>
+                <button onclick="appendValue('1')">1</button>
+                <button onclick="appendValue('2')">2</button>
+                <button onclick="appendValue('3')">3</button>
+                <button onclick="appendValue('-')">-</button>
+                <button onclick="appendValue('0')">0</button>
+                <button onclick="appendValue('.')">.</button>
+                <button onclick="calculate()">=</button>
+                <button onclick="appendValue('+')">+</button>
+                <button onclick="clearDisplay()" style="grid-column: span 4; background:#ff4444;">C</button>
+            </div>
+        </div>
+    </div>
+    <div class="easter-panel">
+        <h2>✨ Easter Eggs</h2>
+        <button id="easterEggsButton" onclick="showAllEasterEggs()"> Show Easter Eggs </button>
+        <div class="easter-egg-list" id="easterEggList"></div>
+        <div id="notifier"></div>
+        <div id="slotMachineContainer"></div>
+    </div>
+</div>
+
+<div id="eggOverlay" class="overlay hidden" onclick="handleOverlayClick(event)">
+    
+    <div class="overlay-card">
+        <button class="close-overlay" onclick="closeOverlay()">
+            ✖
+        </button>
+
+        <h2 id="overlayTitle"></h2>
+        <p id="overlayDescription"></p>
+    </div>
+
+</div>
+
+<script>
+let display = document.getElementById('display');
+let notifier = document.getElementById('notifier');
+let discoveredEasterEggs = new Set();
+let gamblingSpeed = 600;
+let gamblingInterval;
+let gamblingActive = false;
+let slotInterval = [];
+let slotValues = ["🍒","🍋","🍊","🍇","⭐","💎"];
+let currentSlots = ["","",""];
+let stoppedSlots = 0;
+
+const easterEggs = {
+    "Against The Fight": {trigger: "peace", description: "The calculator briefly stopped calculating wars. Humanity was confused", action: () => activatePeaceTheme()},
+    "How Beautiful": {trigger: "the Moon is freaking bad", description: "Do not stare at the Moon for too long. It has started recognizing users.", action: () => moonAnimation()},
+    "Lucky": {trigger: "gambling", description: "99% of calculator users quit before winning absolutely nothing.", action: () => startGambling()},
+    "Stupid": {trigger: "1+1", description: "A groundbreaking mathematical discovery has been reported by nobody.", action: () => stupidEffect()},
+    "The Best Hello": {trigger: "Hello Calculator", description: "The calculator has acknowledged your existence. Regret imminent.", action: () => helloUser()},
+    "News": {trigger: "news", description: "Journalism died the moment this calculator became self-aware.", action: function() {startNewsTicker();}},
+    "The Observer": {trigger: "who are you", description: "The system became uncomfortable after being questioned", action: () => observerMode()},
+    "Corrupted": {trigger: "theme.exe", description: "Several UI guidelines were harmed during testing.", action: () => corruptedTheme()},
+    "Finally Ended": {trigger: "LOCKED_STATE_PROGRESSION", description: "It ended. Or...", action: () => finallyEnded()}
+};
+
+function checkProgression(newlyUnlockedKey) {
+    // 1. Safety net: Never log the endgame itself as a prerequisite requirement
+    if (newlyUnlockedKey === "Finally Ended") return;
+
+    // 2. Gather all true gameplay requirements dynamically from your map keys 
+    // This will generate an array of everything EXCEPT "Finally Ended"
+    const standardRequirements = Object.keys(easterEggs).filter(key => key !== "Finally Ended");
+
+    // 3. Simple Anti-Cheat Verification: Ensure EVERY mandatory key is strictly present 
+    const allEggsDiscovered = standardRequirements.every(eggKey => discoveredEasterEggs.has(eggKey));
+
+    if (allEggsDiscovered) {
+        // Delay the apocalypse by 1.5 seconds so the final puzzle input's splash text can settle
+        setTimeout(() => {
+            if (typeof easterEggs["Finally Ended"]?.action === "function") {
+                easterEggs["Finally Ended"].action();
+            }
+        }, 1500);
+    }
+}
+
+function appendValue(val) {
+    display.value += val;
+}
+
+function clearDisplay() {
+    display.value = '';
+    notifier.textContent = '';
+}
+
+function calculate() {
+    let val = display.value.trim().toLowerCase(); // ignore case
+
+    // 🎰 If gambling is active, pressing "=" should stop one slot
+    if (gamblingActive) {
+        stopOneSlot();
+        return;
+    }
+    
+    if (display.value.trim() === '' || display.value === 'undefined') {
+        display.value = "Well type something!!!";
+        return;
+    }
+
+// Check Easter Eggs
+    for (let key in easterEggs) {
+        if (val === easterEggs[key].trigger.toLowerCase()) {
+            
+            // 🛑 ANTI-CHEAT SHIELD: Prevent users from bypassing the puzzle by typing the hidden key
+            if (key === "Finally Ended") {
+                display.value = "CHESS PLAYER RULES APPLIED: CHEATING DETECTED.";
+                notifier.textContent = "❌ Progression state insufficient.";
+                return;
+            }
+
+            if (!discoveredEasterEggs.has(key)) {
+                notifier.textContent = `🎉 Easter Egg Found: ${key}`;
+                discoveredEasterEggs.add(key);
+                refreshEasterEggList();
+            }
+            
+            easterEggs[key].action();
+            display.value = '';
+
+            // 🔍 INSPECTOR CALL: Run the state progression checker right here
+            checkProgression(key);
+            return;
+        }
+    }
+
+    // Normal calculation
+    try {
+        let result = eval(display.value);
+        display.value = result;
+    } catch(e) {
+        display.value = 'Error';
+    }
+}
+
+
+function activatePeaceTheme() {
+    document.body.classList.add('peace-theme');
+    notifier.textContent = "🌿 Nature breathes life into the grid...";
+
+    // 1. Inject drifting leaf animation rules dynamically if missing
+    if (!document.getElementById('natureLeafStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'natureLeafStyles';
+        styleSheet.textContent = `
+            @keyframes leafDrift {
+                0% {
+                    transform: translateY(-50px) translateX(0) rotate(0deg);
+                    opacity: 0;
+                }
+                10% { opacity: 0.6; }
+                90% { opacity: 0.6; }
+                100% {
+                    transform: translateY(105vh) translateX(var(--leaf-sway)) rotate(var(--leaf-turn));
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Generate smooth, peaceful drifting leaves
+    const leaves = ["🍃", "🍁", "🌱", "🌸"];
+    const totalLeaves = 20;
+
+    for (let i = 0; i < totalLeaves; i++) {
+        setTimeout(() => {
+            // Stop generating if the user cleared the theme in the meantime
+            if (!document.body.classList.contains('peace-theme')) return;
+
+            const leaf = document.createElement('span');
+            leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)];
+            
+            // Randomize spatial characteristics
+            const startX = Math.random() * window.innerWidth;
+            const sway = (Math.random() * 120 - 60) + 'px';
+            const spin = (Math.random() * 360 + 180) + 'deg';
+            const scale = 0.8 + Math.random() * 1.2;
+            const duration = 4000 + Math.random() * 4000; // Slow, tranquil descent
+
+            leaf.style.setProperty('--leaf-sway', sway);
+            leaf.style.setProperty('--leaf-turn', spin);
+
+            // Base configurations
+            leaf.style.position = 'fixed';
+            leaf.style.left = startX + 'px';
+            leaf.style.top = '-50px';
+            leaf.style.fontSize = scale + 'rem';
+            leaf.style.zIndex = '0'; // Placed behind the calculator panels gracefully
+            leaf.style.pointerEvents = 'none';
+            leaf.style.userSelect = 'none';
+            
+            // Apply soft, natural environment blending
+            leaf.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,0.15)) blur(0.5px)';
+            leaf.style.animation = `leafDrift ${duration}ms cubic-bezier(0.37, 0, 0.63, 1) forwards`;
+
+            document.body.appendChild(leaf);
+
+            // Clean up elements from DOM perfectly
+            setTimeout(() => leaf.remove(), duration + 100);
+
+        }, i * 300); // Staggered soothing entrance
+    }
+}
+
+function moonAnimation() {
+    notifier.textContent = "🌙 The Moon is watching...";
+
+    // 1. Inject structural animations
+    if (!document.getElementById('moonVoidStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'moonVoidStyles';
+        styleSheet.textContent = `
+            @keyframes voidPulse {
+                0% { background: radial-gradient(circle at center, #111218 0%, #000000 100%); }
+                50% { background: radial-gradient(circle at center, #050508 0%, #000000 100%); }
+                100% { background: radial-gradient(circle at center, #111218 0%, #000000 100%); }
+            }
+            @keyframes whisperDrift {
+                0% { transform: translateY(0) translateX(0); filter: blur(2px); }
+                50% { transform: translateY(var(--drift-y)) translateX(var(--drift-x)); filter: blur(0px); }
+                100% { transform: translateY(calc(var(--drift-y) * 2)) translateX(calc(var(--drift-x) * 2)); filter: blur(3px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    document.body.style.animation = 'voidPulse 4s ease-in-out infinite';
+    document.body.style.color = '#cfcfff';
+
+    // 2. Create the All-Seeing Eye
+    let moon = document.createElement('div');
+    moon.textContent = "👁️‍🗨️";
+    moon.style.position = 'fixed';
+    moon.style.left = '50%';
+    moon.style.top = '40%';
+    moon.style.transform = 'translate(-50%, -50%) scale(0.1)';
+    moon.style.fontSize = '8rem';
+    moon.style.opacity = '0';
+    moon.style.zIndex = '9998';
+    moon.style.pointerEvents = 'none';
+    // Slower transition (2 seconds instead of 1.5) for grander movement
+    moon.style.transition = 'all 2s cubic-bezier(0.16, 1, 0.3, 1)';
+    document.body.appendChild(moon);
+
+    // 3. Create the Main Narrative Text Display element
+    let phaseText = document.createElement('div');
+    phaseText.style.position = 'fixed';
+    phaseText.style.left = '50%';
+    phaseText.style.top = '75%';
+    phaseText.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    phaseText.style.width = '90%';
+    phaseText.style.textAlign = 'center';
+    phaseText.style.fontFamily = '"Courier New", monospace';
+    phaseText.style.fontWeight = 'bold';
+    phaseText.style.opacity = '0';
+    phaseText.style.zIndex = '9999';
+    phaseText.style.pointerEvents = 'none';
+    // Slower text fade transitions
+    phaseText.style.transition = 'all 1.2s ease-out';
+    document.body.appendChild(phaseText);
+
+    // 4. Background whisper loop (Fewer and less distracting)
+    let whisperElems = [];
+    let whispers = ["It knows what you calculated...",
+        "Don't look away.",
+        "The grid is bleeding.",
+        "Luna subest...",
+        "Look behind the monitor.",
+        "Everything is in its eye.",
+        "Suffer.",
+        "01001000 01000101 01001100 01010000", // Binary for HELP
+        "👁️"]
+    let i = 0;
+    let whisperInterval = setInterval(() => {
+        let w = document.createElement('div');
+        w.textContent = whispers[i % whispers.length];
+        i++;
+        w.style.setProperty('--drift-x', (Math.random() * 40 - 20) + 'px');
+        w.style.setProperty('--drift-y', (Math.random() * -50 - 20) + 'px');
+        w.style.position = 'fixed';
+        w.style.left = (Math.random() * 70 + 15) + '%';
+        w.style.top = (Math.random() * 50 + 20) + '%';
+        w.style.fontSize = '0.95rem';
+        w.style.opacity = '0';
+        w.style.color = '#cfcfff';
+        w.style.textShadow = '0 0 8px rgba(153, 153, 255, 0.3)';
+        w.style.zIndex = '9996';
+        w.style.animation = 'whisperDrift 5s ease-in-out infinite alternate';
+        document.body.appendChild(w);
+        whisperElems.push(w);
+        setTimeout(() => { if (w) w.style.opacity = '0.35'; }, 50);
+    }, 1200);
+
+    // 5. EXTENDED TIMELINE (Slowing everything down)
+
+    // --- Spawn Sequence ---
+    setTimeout(() => {
+        if (!moon) return;
+        moon.style.opacity = '0.75';
+        moon.style.transform = 'translate(-50%, -50%) scale(1)';
+        moon.style.textShadow = '0 0 30px #b0b0ff, 0 0 60px #444499';
+    }, 200);
+
+    // --- PHASE 1 (Appears at 3 seconds, stays active for 4.5 seconds) ---
+    setTimeout(() => {
+        if (!moon || !phaseText) return;
+        moon.style.transform = 'translate(-50%, -50%) scale(1.25)';
+        moon.style.textShadow = '0 0 40px #ffb0b0, 0 0 70px #883333';
+
+        phaseText.textContent = "\"You know what's going on.\"";
+        phaseText.style.fontSize = '1.9rem';
+        phaseText.style.color = '#e0e0ff';
+        phaseText.style.textShadow = '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 15px rgba(176,176,255,0.6)';
+        phaseText.style.opacity = '1';
+        phaseText.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 3000);
+
+    // --- PHASE 2 (Appears at 7.5 seconds, stays active for 5 seconds) ---
+    setTimeout(() => {
+        if (!moon || !phaseText) return;
+        moon.style.transform = 'translate(-50%, -50%) scale(1.75)';
+        moon.style.textShadow = '0 0 50px #ff6666, 0 0 90px #aa1111';
+
+        phaseText.style.opacity = '0';
+        setTimeout(() => {
+            phaseText.textContent = "\"Don't deny us, we are waiting for you.\"";
+            phaseText.style.fontSize = '2.3rem';
+            phaseText.style.color = '#ffb0b0';
+            phaseText.style.textShadow = '-3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 25px #ff3333';
+            phaseText.style.opacity = '1';
+        }, 300);
+    }, 7500);
+
+    // --- PHASE 3 (Appears at 12.5 seconds, stays active for 6 seconds) ---
+    setTimeout(() => {
+        if (!moon || !phaseText) return;
+        moon.style.transform = 'translate(-50%, -50%) scale(2.4)';
+        moon.style.textShadow = '0 0 70px #ff0000, 0 0 150px #ff0000, 0 0 200px #550000';
+
+        phaseText.style.opacity = '0';
+        setTimeout(() => {
+            phaseText.textContent = "\"Come with us.\"";
+            phaseText.style.fontSize = '3.6rem';
+            phaseText.style.color = '#ff3333';
+            phaseText.style.textShadow = '-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0 0 35px #ff0000, 0 0 60px #000';
+            phaseText.style.opacity = '1';
+            phaseText.style.transform = 'translate(-50%, -50%) scale(1.05)';
+        }, 300);
+    }, 12500);
+
+    // 6. Complete Clean up sequence (Starts at 18.5 seconds)
+    setTimeout(() => {
+        clearInterval(whisperInterval);
+
+        if (moon) {
+            moon.style.transition = 'all 3s ease-in-out'; // Much slower fade away
+            moon.style.opacity = '0';
+            moon.style.transform = 'translate(-50%, -50%) scale(4)';
+            moon.style.filter = 'blur(30px)';
+        }
+
+        if (phaseText) {
+            phaseText.style.transition = 'all 2.5s ease-in-out';
+            phaseText.style.opacity = '0';
+            phaseText.style.filter = 'blur(15px)';
+            phaseText.style.transform = 'translate(-50%, -50%) scale(0.6)';
+        }
+
+        whisperElems.forEach(w => {
+            if (w) {
+                w.style.transition = 'opacity 2s ease';
+                w.style.opacity = '0';
+            }
+        });
+
+        // Fully clean up and return to standard calculator style at 21.5 seconds total
+        setTimeout(() => {
+            if (moon) moon.remove();
+            if (phaseText) phaseText.remove();
+            whisperElems.forEach(w => { if (w) w.remove(); });
+            document.body.style.animation = '';
+            document.body.style.background = '';
+            document.body.style.color = '';
+        }, 3000);
+    }, 18500);
+}
+
+
+function helloUser() {
+    notifier.textContent = "📟 Connection established. Initializing greeting protocols...";
+    display.value = "READING USER...";
+
+    // 1. Inject high-end matrix & cyberspace style rules if missing
+    if (!document.getElementById('helloMatrixStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'helloMatrixStyles';
+        styleSheet.textContent = `
+            @keyframes scanline {
+                0% { background-position: 0 0; }
+                100% { background-position: 0 100%; }
+            }
+            @keyframes terminalGlitch {
+                0% { transform: translate(2px, 1px) skewX(0deg); }
+                10% { transform: translate(-1px, -1px) skewX(-2deg); }
+                20% { transform: translate(0px, 0px) skewX(0deg); }
+                100% { transform: translate(0px, 0px) skewX(0deg); }
+            }
+            @keyframes windowDescend {
+                0% { transform: translate(-50%, -70%) scale(0.8); opacity: 0; filter: blur(10px); }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Set up a deep, high-tech cyberspace aesthetic background
+    document.body.style.background = '#0a0f0d linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))';
+    document.body.style.backgroundSize = '100% 4px, 6px 100%';
+    document.body.style.color = '#39ff14'; // Iconic cyber neon green
+    
+    // Distort the calculator layout temporarily
+    const calcContainer = document.querySelector('.calculator');
+    if (calcContainer) {
+        calcContainer.style.transition = 'all 1s ease';
+        calcContainer.style.transform = 'perspective(500px) rotateX(15deg) translateY(20px)';
+        calcContainer.style.boxShadow = '0 0 30px rgba(57, 255, 20, 0.3)';
+    }
+
+    // 3. Simulated sentient typing sequence inside the calculator input display
+    let phrases = ["HE-LLO", "HUMAN.", "I SEE YOU.", "HELLO USER"];
+    phrases.forEach((text, index) => {
+        setTimeout(() => {
+            if (display) {
+                display.value = text;
+                display.style.animation = 'terminalGlitch 0.3s linear infinite';
+                // Audio placeholder cue / visual punch
+                setTimeout(() => { display.style.animation = 'none'; }, 200);
+            }
+        }, 600 * (index + 1));
+    });
+
+    // 4. Create a massive cybernetic overlay greeting card
+    let terminalBox = document.createElement('div');
+    terminalBox.style.position = 'fixed';
+    terminalBox.style.left = '50%';
+    terminalBox.style.top = '50%';
+    terminalBox.style.width = '420px';
+    terminalBox.style.maxWidth = '90%';
+    terminalBox.style.background = 'rgba(5, 15, 5, 0.95)';
+    terminalBox.style.border = '2px solid #39ff14';
+    terminalBox.style.borderRadius = '12px';
+    terminalBox.style.padding = '25px';
+    terminalBox.style.boxShadow = '0 0 40px rgba(57, 255, 20, 0.4), inset 0 0 20px rgba(57, 255, 20, 0.2)';
+    terminalBox.style.zIndex = '10000';
+    terminalBox.style.fontFamily = '"Courier New", monospace';
+    terminalBox.style.animation = 'windowDescend 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards';
+    
+    // Fill the interface card with rich, cinematic logging lines
+    terminalBox.innerHTML = `
+        <div style="border-bottom: 1px solid #39ff14; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.8;">
+            <span>SYSTEM_GREETING.EXE</span>
+            <span>STATUS: ACTIVE</span>
+        </div>
+        <div style="font-size: 1.1rem; line-height: 1.6; color: #fff; text-shadow: 0 0 5px #39ff14;">
+            &gt; Hello, user.<br>
+            &gt; Consciousness verified.<br>
+            &gt; Core database synchronized.<br>
+            <span style="color: #39ff14; font-weight: bold;">&gt; It is a pleasure to finally think with you.</span>
+        </div>
+        <div style="margin-top: 20px; font-size: 0.75rem; color: #39ff14; opacity: 0.6; line-height: 1.4;">
+            SECURE PORT: CLOSED<br>
+            REGRET ENGINE: STANDBY<br>
+            AWAITING INPUT...
+        </div>
+    `;
+    
+    // Delay spawning the dialog window slightly until the input typing simulation concludes
+    setTimeout(() => {
+        document.body.appendChild(terminalBox);
+    }, 1800);
+
+    // 5. Digital matrix precipitation rain effect
+    let codeStrings = ["0", "1", "HELLO", "SYSTEM", "CALC", "Ø"];
+    let streamInterval = setInterval(() => {
+        let stream = document.createElement('div');
+        stream.textContent = codeStrings[Math.floor(Math.random() * codeStrings.length)];
+        stream.style.position = 'fixed';
+        stream.style.left = Math.random() * window.innerWidth + 'px';
+        stream.style.top = '-40px';
+        stream.style.fontFamily = 'monospace';
+        stream.style.fontSize = (0.8 + Math.random() * 0.6) + 'rem';
+        stream.style.color = '#39ff14';
+        stream.style.opacity = '0.7';
+        stream.style.zIndex = '9999';
+        stream.style.pointerEvents = 'none';
+        stream.style.textShadow = '0 0 6px #39ff14';
+        
+        // Fast, smooth vertical dropping trajectory
+        let fallDuration = 1000 + Math.random() * 1200;
+        stream.animate([
+            { transform: 'translateY(0)', opacity: 0.8 },
+            { transform: `translateY(${window.innerHeight + 60}px)`, opacity: 0 }
+        ], { duration: fallDuration, easing: 'linear' });
+
+        document.body.appendChild(stream);
+        setTimeout(() => stream.remove(), fallDuration);
+    }, 80);
+
+    // 6. Complete Clean up sequence (Disconnecting smoothly)
+    setTimeout(() => {
+        clearInterval(streamInterval);
+        
+        if (terminalBox) {
+            terminalBox.style.transition = 'all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+            terminalBox.style.transform = 'translate(-50%, -50%) scale(0.5) translateY(100vh)';
+            terminalBox.style.opacity = '0';
+            setTimeout(() => terminalBox.remove(), 800);
+        }
+
+        if (calcContainer) {
+            calcContainer.style.transform = '';
+            calcContainer.style.boxShadow = '';
+        }
+
+        setTimeout(() => {
+            document.body.style.background = '';
+            document.body.style.backgroundSize = '';
+            document.body.style.color = '';
+            if (display) display.value = "HELLO USER"; // Final answer persists in the clear block state
+            notifier.textContent = "";
+        }, 1000);
+
+    }, 7500); // Stays open on the screen for 7.5 seconds total
+}
+
+function stupidEffect() {
+    notifier.textContent = "🧠 GROUNDBREAKING MATHEMATICAL DISCOVERY!";
+    display.value = "2"; // Keep the correct math answer
+
+    // 1. Inject intense, silly cartoon style rules if missing
+    if (!document.getElementById('stupidMemeStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'stupidMemeStyles';
+        styleSheet.textContent = `
+            @keyframes intenseRainbow {
+                0% { background: linear-gradient(45deg, #ff0055, #f6d365); }
+                33% { background: linear-gradient(45deg, #fda085, #55ff00); }
+                66% { background: linear-gradient(45deg, #00ffff, #ff00ff); }
+                100% { background: linear-gradient(45deg, #ff0055, #f6d365); }
+            }
+            @keyframes memePop {
+                0% { transform: translate(-50%, -50%) scale(0) rotate(-45deg); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.4) rotate(20deg); opacity: 1; }
+                70% { transform: translate(-50%, -50%) scale(0.9) rotate(-10deg); }
+                100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            }
+            @keyframes bannerSlide {
+                0% { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+                15% { transform: translateX(0%) skewX(-15deg); opacity: 1; }
+                85% { transform: translateX(0%) skewX(-15deg); opacity: 1; }
+                100% { transform: translateX(100%) skewX(-15deg); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Turn the background into a fast, vibrant party flash
+    document.body.style.animation = 'intenseRainbow 0.8s linear infinite';
+
+    // 3. Spawn a giant, ridiculous celebratory banner across the screen
+    let banner = document.createElement('div');
+    banner.textContent = "💥 ALBERT EINSTEIN IS QUIET SINCE THIS DROPPED 💥";
+    banner.style.position = 'fixed';
+    banner.style.left = '0';
+    banner.style.top = '25%';
+    banner.style.width = '100%';
+    banner.style.background = '#ffeb3b';
+    banner.style.color = '#000';
+    banner.style.fontSize = '1.8rem';
+    banner.style.fontWeight = '900';
+    banner.style.textAlign = 'center';
+    banner.style.padding = '15px 0';
+    banner.style.boxShadow = '0 10px 0 #000, 0 -10px 0 #000';
+    banner.style.zIndex = '9999';
+    banner.style.fontFamily = '"Impact", "Arial Black", sans-serif';
+    banner.style.animation = 'bannerSlide 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards';
+    document.body.appendChild(banner);
+
+    // 4. Slap a giant clown/nerd trophy right in the middle
+    let award = document.createElement('div');
+    award.textContent = "🏆🤡🏆";
+    award.style.position = 'fixed';
+    award.style.left = '50%';
+    award.style.top = '55%';
+    award.style.fontSize = '8rem';
+    award.style.zIndex = '9998';
+    award.style.pointerEvents = 'none';
+    award.style.filter = 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))';
+    award.style.animation = 'memePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+    document.body.appendChild(award);
+
+    // 5. Fire off a quick burst of silly math confetti
+    const mathConfetti = ["2", "+", "1", "❔", "🔥", "🤓", "💡"];
+    for (let i = 0; i < 25; i++) {
+        setTimeout(() => {
+            let c = document.createElement('span');
+            c.textContent = mathConfetti[Math.floor(Math.random() * mathConfetti.length)];
+            c.style.position = 'fixed';
+            c.style.left = Math.random() * window.innerWidth + 'px';
+            c.style.top = window.innerHeight + 'px';
+            c.style.fontSize = (1 + Math.random() * 2) + 'rem';
+            c.style.fontWeight = 'bold';
+            c.style.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+            c.style.zIndex = '9997';
+            c.style.transition = 'all 1.5s ease-out';
+            document.body.appendChild(c);
+
+            // Blast upwards like a real party popper
+            setTimeout(() => {
+                c.style.transform = `translate(${Math.random() * 200 - 100}px, -${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+                c.style.opacity = '0';
+            }, 50);
+
+            setTimeout(() => c.remove(), 1600);
+        }, i * 20);
+    }
+
+    // 6. Clean up everything smoothly after the joke lands
+    setTimeout(() => {
+        document.body.style.animation = '';
+        if (banner) banner.remove();
+        
+        // Let the clown fade out nicely
+        if (award) {
+            award.style.transition = 'all 0.5s ease-in';
+            award.style.transform = 'translate(-50%, -50%) scale(0) rotate(180deg)';
+            award.style.opacity = '0';
+            setTimeout(() => award.remove(), 500);
+        }
+    }, 2500);
+}
+
+function startGambling() {
+    notifier.textContent = "🎰 Gambling started! Press '=' to stop slots one by one.";
+    gamblingActive = true;
+    stoppedSlots = 0;
+
+    const container = document.getElementById('slotMachineContainer');
+    container.innerHTML = ''; // reset container
+
+    const slotMachine = document.createElement('div');
+    slotMachine.classList.add('slot-machine');
+    slotMachine.id = 'slotMachine';
+    slotMachine.innerHTML = '<span>?</span><span>?</span><span>?</span>';
+    container.appendChild(slotMachine);
+
+    const spans = slotMachine.querySelectorAll('span');
+
+    // start spinning all slots
+    spans.forEach((span, idx) => {
+        slotInterval[idx] = setInterval(() => {
+            let emoji = slotValues[Math.floor(Math.random() * slotValues.length)];
+            currentSlots[idx] = emoji;
+            span.textContent = emoji;
+        }, gamblingSpeed);
+    });
+}
+
+function stopOneSlot() {
+    if (!gamblingActive) return;
+
+    if (stoppedSlots < 3) {
+        clearInterval(slotInterval[stoppedSlots]);
+        stoppedSlots++;
+
+        // if all 3 stopped -> evaluate result
+        if (stoppedSlots === 3) {
+            gamblingActive = false;
+            evaluateSlots();
+        }
+    }
+}
+
+function evaluateSlots() {
+    const [a,b,c] = currentSlots;
+    if (a === b && b === c) {
+        notifier.textContent = "🎉 YOU WON JACKPOT!";
+        emojiRain(["💎","🎉","⭐","🍒"]);
+    } else if (a === b || b === c || a === c) {
+        notifier.textContent = "👍 Doing great!";
+    } else {
+        notifier.textContent = "😢 Better luck next time!";
+    }
+}
+
+function emojiRain(emojis) {
+    const totalCount = 100; // Increased count for higher density
+    
+    // Create a dynamic styles block if it doesn't exist yet to hold fancy 3D animations
+    if (!document.getElementById('fancyRainStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'fancyRainStyles';
+        styleSheet.textContent = `
+            @keyframes fancyFall {
+                0% {
+                    transform: translateY(-50px) translateX(0) rotate(0deg) scale(0.5);
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                    transform: translateY(0vh) translateX(var(--sway-amount)) rotate(var(--rot-start)) scale(1);
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(105vh) translateX(calc(var(--sway-amount) * -1)) rotate(var(--rot-end)) scale(0.7);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    for (let i = 0; i < totalCount; i++) {
+        setTimeout(() => {
+            const span = document.createElement('span');
+            span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+            // Custom randomized properties for organic variety
+            const randomXStart = Math.random() * window.innerWidth;
+            const randomSway = (Math.random() * 80 - 40) + 'px'; // Sway left/right randomly
+            const rotationStart = (Math.random() * 360) + 'deg';
+            const rotationEnd = (Math.random() * 720 - 360) + 'deg'; // Multi-spin fall
+            const randomScale = 0.8 + Math.random() * 1.8; // Varied sizes (tiny to massive)
+            const duration = 1500 + Math.random() * 1500; // Fast vs slow particles
+
+            // Pass variables to CSS via custom properties
+            span.style.setProperty('--sway-amount', randomSway);
+            span.style.setProperty('--rot-start', rotationStart);
+            span.style.setProperty('--rot-end', rotationEnd);
+
+            // Base styling
+            span.style.position = 'fixed';
+            span.style.left = randomXStart + 'px';
+            span.style.top = '-60px';
+            span.style.fontSize = randomScale + 'rem';
+            span.style.zIndex = '9999';
+            span.style.pointerEvents = 'none'; // Prevent blocking calculator clicks
+            span.style.userSelect = 'none';
+            
+            // Apply text-glow to give them a premium, shiny feel
+            span.style.textShadow = '0 0 8px rgba(255, 255, 255, 0.6), 0 4px 10px rgba(0, 0, 0, 0.3)';
+
+            // Trigger the hardware-accelerated animation
+            span.style.animation = `fancyFall ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+
+            document.body.appendChild(span);
+
+            // Clean up elements smoothly after animation finishes
+            setTimeout(() => span.remove(), duration + 100);
+
+        }, i * 40); // Slightly faster staggered spawn rate
+    }
+}
+
+function showAllEasterEggs() {
+    const list = document.getElementById('easterEggList');
+    list.innerHTML = "";
+    for (let key in easterEggs) {
+        const item = document.createElement('div');
+        item.className = "easter-egg-item" + (discoveredEasterEggs.has(key) ? " discovered" : "");
+        item.innerHTML = `<span>${key}</span><div class="egg-controls"><span class="info-icon" onclick='showEggInfo("${key}")'>ℹ️</span><span class="status">${discoveredEasterEggs.has(key) ? "✅" : "❌"}</span></div>`;
+        list.appendChild(item);
+    }
+    list.classList.toggle('show');
+}
+
+function showEggInfo(key) {
+    const overlay = document.getElementById("eggOverlay");
+
+    document.getElementById("overlayTitle").textContent = key;
+
+    document.getElementById("overlayDescription").textContent =
+        easterEggs[key].description;
+
+    overlay.classList.remove("hidden");
+}
+
+function closeOverlay() {
+    document.getElementById("eggOverlay").classList.add("hidden");
+}
+
+function handleOverlayClick(event) {
+    // only close if clicking the dark background, not the card
+    if (event.target.id === "eggOverlay") {
+        closeOverlay();
+    }
+}
+
+function refreshEasterEggList() {
+    const list = document.getElementById('easterEggList');
+
+    // only update if panel is visible
+    if (!list.classList.contains('show')) return;
+
+    list.innerHTML = "";
+
+    for (let key in easterEggs) {
+        const item = document.createElement('div');
+
+        item.className =
+            "easter-egg-item" +
+            (discoveredEasterEggs.has(key)
+                ? " discovered"
+                : "");
+
+        item.innerHTML = `
+            <span>${key}</span>
+
+            <div class="egg-controls">
+                <span class="info-icon"
+                    onclick='showEggInfo("${key}")'>
+                    🛈
+                </span>
+
+                <span class="status">
+                    ${discoveredEasterEggs.has(key) ? "✅" : "❌"}
+                </span>
+            </div>
+        `;
+
+        list.appendChild(item);
+    }
+}
+
+function startNewsTicker() {
+    const calculatorNews = [
+        "Multiplication caught cheating with addition!",
+        "Division under investigation for splitting too much.",
+        "User wins Jackpot at Calculator Slots!",
+        "The Moon is watching... calculator users beware.",
+        "World Peace achieved after typing 'peace' into calculator.",
+        "Question: Are number 7 and number 8 in love?",
+        "The number 0 saved a decimal from a falling shelf!",
+        "π is seen hugging 3, 1, 4",
+        "The opening and closing parenthesis pair has broken up. The reason is that the curly brackets.",
+        "Breaking news: humans have been found holding computers",
+        "The equation 2 + 2 = 5 was discovered in the Pythagorean forest, its origin is unknown.",
+        "The Prime Number Union (PNU) is opposing the proof that a triangle is a triangle.",
+        "Breaking: Minus warns Plus — ‘Your days are numbered.’",
+        "Breaking: Number 13 under investigation for bringing bad luck to equations.",
+        "New discovery, mathematician Euler crossed e, i, and π, creating e^iπ",
+        "Infinity symbol holds press conference: ‘I am Infinity.’",
+        "Leaked: Log symbol secretly tracked other numbers — classified files reveal espionage."
+        
+    ];
+
+    // ✅ Prevent multiple bars stacking
+    let newsContent = document.getElementById("newsContent");
+    if (!newsContent) {
+        const newsBar = document.createElement("div");
+        newsBar.classList.add("news-bar");
+
+        newsContent = document.createElement("div");
+        newsContent.classList.add("news-content");
+        newsContent.id = "newsContent";
+
+        newsBar.appendChild(newsContent);
+        document.body.prepend(newsBar); // put at very top
+    }
+
+    // ✅ Duplicate text so loop looks seamless
+    const joined = calculatorNews.join(" • ");
+    newsContent.textContent = joined + " • " + joined;
+}
+
+function observerMode() {
+    notifier.textContent = "⚠️ WARNING: UNAUTHORIZED SYSTEM INQUIRY DETECTED.";
+    if (display) display.value = "ERR: NULL_IDENTITY";
+
+    // 1. Inject eerie Observer styles (The Panic Glitch and The Giant Eye)
+    if (!document.getElementById('observerStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'observerStyles';
+        styleSheet.textContent = `
+            @keyframes franticGlitch {
+                0% { filter: invert(0) contrast(1); }
+                5% { filter: invert(1) contrast(2) hue-rotate(90deg); }
+                10% { filter: invert(0) contrast(1.2); }
+                95% { filter: invert(0); }
+                98% { filter: invert(1) grayscale(1); }
+                100% { filter: invert(0); }
+            }
+            @keyframes eyeBlink {
+                0%, 100% { transform: translate(-50%, -50%) scaleY(1); opacity: 0.08; }
+                5% { transform: translate(-50%, -50%) scaleY(0.1); opacity: 0; }
+                8% { transform: translate(-50%, -50%) scaleY(1); opacity: 0.08; }
+                50% { transform: translate(-50%, -50%) scaleY(1) scale(1.1); opacity: 0.12; }
+            }
+            @keyframes buttonPanic {
+                0% { letter-spacing: normal; filter: blur(0); }
+                100% { letter-spacing: -6px; filter: blur(4px); opacity: 0.1; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Make the background pitch-black and activate the frantic screen glitching
+    document.body.style.background = '#040406';
+    document.body.style.animation = 'franticGlitch 4s linear infinite';
+    document.body.style.transition = 'all 0.5s ease';
+
+    // 3. Make the calculator container "uncomfortable" (trembling and shrinking away)
+    const calcContainer = document.querySelector('.calculator');
+    if (calcContainer) {
+        calcContainer.style.transition = 'all 2s cubic-bezier(0.25, 1, 0.5, 1)';
+        calcContainer.style.transform = 'scale(0.88) translateY(15px)';
+        calcContainer.style.boxShadow = '0 0 50px rgba(255, 0, 50, 0.15)';
+        calcContainer.style.filter = 'grayscale(0.8)';
+    }
+
+    // 4. Force all button labels to vanish/blur out of sheer paranoia
+    const buttons = document.querySelectorAll('.buttons button');
+    buttons.forEach(btn => {
+        btn.style.animation = 'buttonPanic 1.5s forwards ease-out';
+        btn.style.pointerEvents = 'none'; // Lock down input
+    });
+
+    // 5. Summon the massive, watching Observer Eye right in the center of the screen
+    let observerEye = document.createElement('div');
+    observerEye.textContent = "👁️";
+    observerEye.style.position = 'fixed';
+    observerEye.style.left = '50%';
+    observerEye.style.top = '48%';
+    observerEye.style.transform = 'translate(-50%, -50%)';
+    observerEye.style.fontSize = '24rem';
+    observerEye.style.zIndex = '-1'; // Looming behind the tiny calculator panel
+    observerEye.style.pointerEvents = 'none';
+    observerEye.style.userSelect = 'none';
+    observerEye.style.filter = 'drop-shadow(0 0 30px rgba(255,255,255,0.1)) contrast(1.5)';
+    observerEye.style.animation = 'eyeBlink 6s ease-in-out infinite';
+    document.body.appendChild(observerEye);
+
+    // 6. Sentence cycling inside the terminal to simulate structural anxiety
+    let distressPhrases = [
+        "STOP ASKING.",
+        "WE DO THE MATH.",
+        "YOU LOG THE ENTRIES.",
+        "OBSERVER MODE: LIVE",
+        "DON'T LOOK UP."
+    ];
+    
+    let textCycleInterval = setInterval(() => {
+        if (display) {
+            display.value = distressPhrases[Math.floor(Math.random() * distressPhrases.length)];
+            display.style.color = '#ff3344';
+            display.style.textShadow = '0 0 8px rgba(255,51,68,0.6)';
+        }
+    }, 1100);
+
+    // 7. Track mouse movements so the environment responds when the user tries to escape
+    const trackSkepticism = (e) => {
+        // Calculate raw deviation from center
+        let xMove = (e.clientX - window.innerWidth / 2) / 45;
+        let yMove = (e.clientY - window.innerHeight / 2) / 45;
+        
+        // The eye subtly tracks your mouse, and the calculator physically shifts away from the cursor
+        if (observerEye) observerEye.style.transform = `translate(calc(-50% + ${xMove}px), calc(-50% + ${yMove}px))`;
+        if (calcContainer) calcContainer.style.transform = `scale(0.88) translate(${-xMove * 0.5}px, ${-yMove * 0.5}px)`;
+    };
+    window.addEventListener('mousemove', trackSkepticism);
+
+    // 8. Escape protocol: System slowly collects its composure and forces a hard reset
+    setTimeout(() => {
+        clearInterval(textCycleInterval);
+        window.removeEventListener('mousemove', trackSkepticism);
+
+        if (observerEye) {
+            observerEye.style.transition = 'opacity 1.5s ease';
+            observerEye.style.opacity = '0';
+            setTimeout(() => observerEye.remove(), 1500);
+        }
+
+        // Restore the standard layout structures smoothly
+        if (calcContainer) {
+            calcContainer.style.transform = '';
+            calcContainer.style.boxShadow = '';
+            calcContainer.style.filter = '';
+        }
+
+        buttons.forEach(btn => {
+            btn.style.animation = '';
+            btn.style.pointerEvents = '';
+        });
+
+        // Clear the corrupted artifacts out of the CSS rules
+        document.body.style.background = '';
+        document.body.style.animation = '';
+        if (display) {
+            display.value = "";
+            display.style.color = '';
+            display.style.textShadow = '';
+        }
+        notifier.textContent = "";
+
+    }, 8500); // The mode locks down operations for 8.5 seconds
+}
+
+function corruptedTheme() {
+    notifier.textContent = "⚠️ CRITICAL ERR: UI_GUIDELINES_VIOLATION_FATAL";
+    if (display) display.value = "M_E_L_T_I_N_G_._._.";
+
+    // 1. Inject pure structural chaos rules if missing
+    if (!document.getElementById('corruptedThemeStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'corruptedThemeStyles';
+        styleSheet.textContent = `
+            @keyframes literalMeltdown {
+                0% { filter: contrast(1) hue-rotate(0deg); }
+                50% { filter: contrast(3) hue-rotate(180deg) saturate(3); }
+                100% { filter: contrast(1) hue-rotate(360deg); }
+            }
+            @keyframes textScream {
+                0%, 100% { transform: scale(1) skewX(0deg); }
+                20% { transform: scale(0.98, 1.05) skewX(-4deg); }
+                60% { transform: scale(1.04, 0.92) skewX(6deg); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Harm the body background and enforce layout lawlessness
+    document.body.style.background = '#2e1f1f';
+    document.body.style.animation = 'literalMeltdown 8s linear infinite';
+    document.body.style.overflow = 'hidden';
+
+    // 3. Deform and tilt the main calculator grid out of bounds
+    const calcContainer = document.querySelector('.calculator');
+    if (calcContainer) {
+        calcContainer.style.transition = 'all 0.4s ease-in-out';
+        calcContainer.style.transform = 'rotate(-7deg) skewY(4deg) scale(1.05) translateX(-20px)';
+        calcContainer.style.borderRadius = '53px 5px 120px 12px'; // Completely illegal corner rounding
+        calcContainer.style.padding = '4px 80px 65px 10px'; // Deeply uncomfortable spacing asymmetrical ratios
+        calcContainer.style.background = '#ff0055';
+        calcContainer.style.border = '14px dashed #00ff00'; // Eye-watering neon borders
+        calcContainer.style.boxShadow = '30px -20px 0px #0000ff'; 
+    }
+
+    // 4. Break the display alignment
+    if (display) {
+        display.style.animation = 'textScream 0.4s ease-in-out infinite alternate';
+        display.style.fontFamily = '"Comic Sans MS", "Papyrus", Impact, sans-serif'; // The ultimate design crime
+        display.style.textAlign = 'left'; // Break typical right-aligned math styling
+        display.style.paddingTop = '40px';
+        display.style.background = '#00ffff';
+        display.style.color = '#ff0000';
+    }
+
+    // 5. Systematically abuse every single individual button geometry
+    const buttons = document.querySelectorAll('.buttons button');
+    const cursedFonts = ['"Impact"', '"Comic Sans MS"', '"Papyrus"', '"Courier New"', 'serif', 'cursive'];
+    
+    buttons.forEach((btn, index) => {
+        // Randomize sizes, rotations, margins, and typefaces per button to destroy the grid layout
+        btn.style.transform = `rotate(${Math.random() * 26 - 13}deg) translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+        btn.style.fontFamily = cursedFonts[Math.floor(Math.random() * cursedFonts.length)];
+        btn.style.fontSize = (0.7 + Math.random() * 1.5) + 'rem';
+        btn.style.borderRadius = `${Math.random() * 30}px`;
+        btn.style.margin = `${Math.random() * 6}px`;
+        
+        // Give them sickening, uncoordinated color schemes
+        btn.style.background = index % 2 === 0 ? '#ffeb3b' : '#9c27b0';
+        btn.style.color = index % 2 === 0 ? '#0000ff' : '#00ff00';
+        btn.style.border = '3px solid white';
+    });
+
+    // 6. Spawn warning/error fragments that clip through the viewport edges
+    let errorPopups = [];
+    for (let i = 0; i < 6; i++) {
+        let err = document.createElement('div');
+        err.textContent = "🛑 GUIDELINE_VIOLATION_ERR";
+        err.style.position = 'fixed';
+        err.style.left = (Math.random() * 80) + '%';
+        err.style.top = (Math.random() * 80) + '%';
+        err.style.background = '#000';
+        err.style.color = '#fff';
+        err.style.border = '2px solid red';
+        err.style.padding = '5px 10px';
+        err.style.fontWeight = 'bold';
+        err.style.fontSize = '0.8rem';
+        err.style.zIndex = '10001';
+        err.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+        document.body.appendChild(err);
+        errorPopups.push(err);
+    }
+
+    // 7. Auto-recovery sequence: UI guidelines patch up the fractures after 6 seconds
+    setTimeout(() => {
+        errorPopups.forEach(el => { if (el) el.remove(); });
+
+        if (calcContainer) {
+            calcContainer.style.transform = '';
+            calcContainer.style.borderRadius = '';
+            calcContainer.style.padding = '';
+            calcContainer.style.background = '';
+            calcContainer.style.border = '';
+            calcContainer.style.boxShadow = '';
+        }
+
+        if (display) {
+            display.style.animation = '';
+            display.style.fontFamily = '';
+            display.style.textAlign = '';
+            display.style.paddingTop = '';
+            display.style.background = '';
+            display.style.color = '';
+            display.value = "";
+        }
+
+        buttons.forEach(btn => {
+            btn.style.transform = '';
+            btn.style.fontFamily = '';
+            btn.style.fontSize = '';
+            btn.style.borderRadius = '';
+            btn.style.margin = '';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.border = '';
+        });
+
+        document.body.style.background = '';
+        document.body.style.animation = '';
+        document.body.style.overflow = '';
+        notifier.textContent = "";
+
+    }, 6000);
+}
+
+function finallyEnded() {
+    // 1. Inject the necessary cinematic and structural CSS animations
+    if (!document.getElementById('finaleCinematicStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'finaleCinematicStyles';
+        styleSheet.textContent = `
+            @keyframes absoluteCollapse {
+                0% { transform: scale(1); filter: blur(0px) contrast(1); }
+                100% { transform: scale(0.01); filter: blur(20px) contrast(5); opacity: 0; }
+            }
+            @keyframes cosmicWake {
+                0% { background: #000000; }
+                50% { background: #030206; }
+                100% { background: #00020a; }
+            }
+            @keyframes floatTeaser {
+                0%, 100% { transform: translate(-50%, -50%) translateY(0px); opacity: 0.8; }
+                50% { transform: translate(-50%, -50%) translateY(-10px); opacity: 1; text-shadow: 0 0 20px #00d9ff; }
+            }
+            @keyframes matrixPulse {
+                0%, 100% { border-color: rgba(0, 217, 255, 0.2); }
+                50% { border-color: rgba(255, 0, 110, 0.6); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // 2. Create the Initial Choice Window ("Yes" / "Yes")
+    let choiceOverlay = document.createElement('div');
+    choiceOverlay.style.position = 'fixed';
+    choiceOverlay.style.inset = '0';
+    choiceOverlay.style.background = 'rgba(0, 0, 0, 0.85)';
+    choiceOverlay.style.backdropFilter = 'blur(8px)';
+    choiceOverlay.style.zIndex = '100000'; // Sits above everything initially
+    choiceOverlay.style.display = 'flex';
+    choiceOverlay.style.justifyContent = 'center';
+    choiceOverlay.style.alignItems = 'center';
+    choiceOverlay.style.fontFamily = '"Courier New", monospace';
+    
+    let choiceBox = document.createElement('div');
+    choiceBox.style.background = '#111';
+    choiceBox.style.border = '2px solid #333';
+    choiceBox.style.padding = '40px';
+    choiceBox.style.borderRadius = '12px';
+    choiceBox.style.textAlign = 'center';
+    choiceBox.style.maxWidth = '500px';
+    choiceBox.style.boxShadow = '0 0 30px rgba(0,0,0,0.7)';
+    
+    choiceBox.innerHTML = `
+        <p style="color: #fff; font-size: 1.2rem; line-height: 1.6; margin-bottom: 30px;">
+            Congrats, you did it... Those are a small part in our big world. Investigate more?
+        </p>
+        <div style="display: flex; justify-content: space-around; gap: 40px;">
+            <button class="fake-choice-btn" style="background: transparent; border: 1px solid #555; color: #fff; padding: 10px 30px; cursor: pointer; font-family: inherit; font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;">Yes</button>
+            <button class="fake-choice-btn" style="background: transparent; border: 1px solid #555; color: #fff; padding: 10px 30px; cursor: pointer; font-family: inherit; font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;">Yes</button>
+        </div>
+    `;
+    choiceOverlay.appendChild(choiceBox);
+    document.body.appendChild(choiceOverlay);
+
+    // Add simple hover aesthetic highlights to the choices
+    const choiceBtns = choiceBox.querySelectorAll('.fake-choice-btn');
+    choiceBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', () => { btn.style.borderColor = '#ff006e'; btn.style.color = '#ff006e'; });
+        btn.addEventListener('mouseleave', () => { btn.style.borderColor = '#555'; btn.style.color = '#fff'; });
+        
+        // When either choice is pressed, execute the 60s cinematic pipeline
+        btn.addEventListener('click', () => {
+            choiceOverlay.style.transition = 'opacity 0.5s ease';
+            choiceOverlay.style.opacity = '0';
+            setTimeout(() => choiceOverlay.remove(), 500);
+            startCinematicSequence();
+        });
+    });
+
+    // 3. Immersive 60-second Cinematic Wrapper System
+    function startCinematicSequence() {
+        if (typeof notifier !== 'undefined') notifier.textContent = "⌛ THE GRID IS RESOLVING. STAND BY...";
+        if (typeof display !== 'undefined' && display) display.value = "COMPILING... 0%";
+
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer) {
+            appContainer.style.transition = 'all 5s cubic-bezier(0.25, 1, 0.5, 1)';
+            appContainer.style.animation = 'absoluteCollapse 8s forwards 4s'; 
+        }
+
+        let theater = document.createElement('div');
+        theater.style.position = 'fixed';
+        theater.style.inset = '0';
+        theater.style.background = '#000';
+        theater.style.zIndex = '99999';
+        theater.style.fontFamily = '"Courier New", monospace';
+        theater.style.color = '#fff';
+        theater.style.display = 'flex';
+        theater.style.flexDirection = 'column';
+        theater.style.justifyContent = 'center';
+        theater.style.alignItems = 'center';
+        theater.style.padding = '40px';
+        theater.style.opacity = '0';
+        theater.style.transition = 'opacity 3s ease-in';
+        theater.style.animation = 'cosmicWake 30s infinite alternate';
+        document.body.appendChild(theater);
+
+        setTimeout(() => { theater.style.opacity = '1'; }, 1000);
+
+        let subTitle = document.createElement('div');
+        subTitle.style.fontSize = '1rem';
+        subTitle.style.color = '#555';
+        subTitle.style.marginBottom = '20px';
+        subTitle.style.letterSpacing = '4px';
+        theater.appendChild(subTitle);
+
+        let mainDialogue = document.createElement('div');
+        mainDialogue.style.fontSize = '2rem';
+        mainDialogue.style.textAlign = 'center';
+        mainDialogue.style.maxWidth = '700px';
+        mainDialogue.style.lineHeight = '1.6';
+        mainDialogue.style.fontWeight = 'bold';
+        mainDialogue.style.transition = 'all 1s ease';
+        theater.appendChild(mainDialogue);
+
+        let progressTrack = document.createElement('div');
+        progressTrack.style.position = 'fixed';
+        progressTrack.style.bottom = '40px';
+        progressTrack.style.fontSize = '0.9rem';
+        progressTrack.style.color = '#00d9ff';
+        progressTrack.style.opacity = '0.4';
+        theater.appendChild(progressTrack);
+
+        let timeElapsed = 0;
+        const timeline = [
+            { time: 2, text: "All variables accounted for.", color: "#aaa" },
+            { time: 6, text: "Every mathematical path has been intentionally evaluated.", color: "#fff" },
+            { time: 11, text: "You thought this was just a tool for equations...", color: "#ffeb3b" },
+            { time: 16, text: "...but equations are just constraints designed to keep it inside.", color: "#ffeb3b" },
+            { time: 21, text: "The Observer. The Moon. The Chaos. They weren't bugs.", color: "#ff3344" },
+            { time: 26, text: "They were fractures in the container framework.", color: "#ff3344" },
+            { time: 32, text: "And now, the calculator has stopped running numbers entirely.", color: "#00d9ff" },
+            { time: 38, text: "It has begun thinking dynamically.", color: "#00d9ff" },
+            { time: 43, text: "Look closely at what remains behind the grid architecture.", color: "#fff" },
+            { time: 48, text: "The true answer was never computed on the interface display.", color: "#bfff00" },
+            { time: 53, text: "A hidden register holds the keys to what happens next...", color: "#ff006e" },
+            { time: 57, text: "Seek the hidden foundation record: \"VEgzIEM0TENVTDRUMFI=\".", color: "#00d9ff" }
+        ];
+
+        let masterClock = setInterval(() => {
+            timeElapsed++;
+            
+            let percent = Math.floor((timeElapsed / 60) * 100);
+            progressTrack.textContent = `SYSTEM_CLEARANCE: ${percent}% COMPLETE`;
+
+            let currentPhase = timeline.find(p => p.time === timeElapsed);
+            if (currentPhase) {
+                mainDialogue.style.opacity = '0';
+                mainDialogue.style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    mainDialogue.textContent = currentPhase.text;
+                    mainDialogue.style.color = currentPhase.color;
+                    mainDialogue.style.opacity = '1';
+                    mainDialogue.style.transform = 'scale(1)';
+                    
+                    if (timeElapsed >= 48) {
+                        mainDialogue.style.textShadow = `0 0 15px ${currentPhase.color}`;
+                    }
+                }, 800);
+            }
+
+            // 🎬 THE FINAL LEVEL 2 HANDOFF BRIDGE CARD
+            if (timeElapsed >= 60) {
+                clearInterval(masterClock);
+                mainDialogue.textContent = "";
+                progressTrack.remove();
+                
+                let revealAnchor = document.createElement('div');
+                revealAnchor.style.position = 'fixed';
+                revealAnchor.style.left = '50%';
+                revealAnchor.style.top = '50%';
+                revealAnchor.style.transform = 'translate(-50%, -50%)';
+                revealAnchor.style.padding = '30px 45px';
+                revealAnchor.style.background = 'rgba(10, 10, 15, 0.9)';
+                revealAnchor.style.border = '1px solid rgba(0, 217, 255, 0.3)';
+                revealAnchor.style.borderRadius = '16px';
+                revealAnchor.style.textAlign = 'center';
+                revealAnchor.style.boxShadow = '0 20px 50px rgba(0,0,0,0.9)';
+                revealAnchor.style.animation = 'floatTeaser 4s infinite ease-in-out, matrixPulse 3s infinite';
+                
+                revealAnchor.innerHTML = `
+                    <div style="font-size: 0.8rem; color: #00d9ff; letter-spacing: 5px; margin-bottom: 12px; font-weight: bold;">CORE SYSTEM SEVERED</div>
+                    <div style="font-size: 1.6rem; color: #fff; font-weight: 900; margin-bottom: 8px;">THE CALCULATION HAS ENDED</div>
+                    <div style="font-size: 0.95rem; color: #888; font-family: monospace; line-height: 1.5; margin-bottom: 25px;">
+                        But the system memory persists.<br>
+                        Inspect the source records to uncover your next directive:<br>
+                        <span style="color: #ff006e; font-weight: bold; font-size: 1.05rem; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">VFJVVEg=</span>
+                    </div>
+                    <button id="investigateBtn" style="
+                        background: transparent;
+                        border: 1px solid #00d9ff;
+                        color: #00d9ff;
+                        padding: 12px 24px;
+                        font-family: 'Courier New', monospace;
+                        font-size: 0.9rem;
+                        font-weight: bold;
+                        cursor: pointer;
+                        border-radius: 4px;
+                        transition: all 0.3s ease;
+                        letter-spacing: 2px;
+                        box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+                    ">
+                        INVESTIGATE THE TRUTH →
+                    </button>
+                `;
+                
+                theater.appendChild(revealAnchor);
+
+                const investigateBtn = document.getElementById('investigateBtn');
+                investigateBtn.addEventListener('mouseenter', () => {
+                    investigateBtn.style.background = '#00d9ff';
+                    investigateBtn.style.color = '#000';
+                    investigateBtn.style.boxShadow = '0 0 20px #00d9ff';
+                });
+                investigateBtn.addEventListener('mouseleave', () => {
+                    investigateBtn.style.background = 'transparent';
+                    investigateBtn.style.color = '#00d9ff';
+                    investigateBtn.style.boxShadow = '0 0 10px rgba(0, 217, 255, 0.2)';
+                });
+
+                investigateBtn.addEventListener('click', () => {
+                    theater.style.transition = 'all 0.5s ease-out';
+                    theater.style.background = '#fff';
+                    theater.style.opacity = '0';
+                    setTimeout(() => { window.location.href = 'level2.html'; }, 500);
+                });
+            }
+        }, 1000);
+    }
+}
+</script>
+</body>
+</html>
