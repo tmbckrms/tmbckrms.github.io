@@ -340,6 +340,37 @@ body.peace-theme #easterEggsButton:hover {
     }
 }
 
+/* 📱 MOBILE RESPONSIVE LAYOUT PATCH */
+@media (max-width: 600px) {
+    
+    /* 1. Ensure the parent wrapper allows vertical scrolling instead of clipping */
+    .app-container, body {
+        height: auto !important;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start !important; /* Prevents center-align pushing elements out */
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    /* 2. THE MAGIC BULLET: Prevent the calculator from being squished or pushed out */
+    .calculator, #calculatorContainer { 
+        flex-shrink: 0 !important; /* Absolute rule: browser cannot downsize or push this */
+        margin-bottom: 20px;       /* Keeps a healthy gap before the list starts */
+    }
+
+    /* 3. Contain the Easter Egg display block so it stays strictly within mobile bounds */
+    .easter-eggs-container, #easterEggListWrapper, .egg-list-container {
+        flex-grow: 1;
+        max-height: 250px;         /* Caps the size of the open menu on small screens */
+        overflow-y: auto !important; /* Forces a scrollbar inside the list container */
+        -webkit-overflow-scrolling: touch; /* Ensures buttery-smooth scrolling on iOS Safari */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+    }
+}
 </style>
 </head>
 <body>
