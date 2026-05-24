@@ -1,1 +1,849 @@
-<h1>Nothing here yet. But soon...</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator - Season 2 Terminal</title>
+<style>
+/* ========================================================
+   CORE TERMINAL DARK THEME
+   ======================================================== */
+body {
+    font-family: "Courier New", Courier, monospace;
+    background: #05070c;
+    background-image: 
+        radial-gradient(circle at 50% 30%, #111726 0%, #05070c 70%),
+        linear-gradient(rgba(18, 24, 38, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 100%, 100% 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #cbd5e1;
+    overflow: hidden;
+    transition: box-shadow 0.5s ease, filter 0.3s ease;
+}
+
+#effectCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.app-container {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 95%;
+    max-width: 1000px;
+    position: relative;
+    z-index: 10;
+}
+
+/* ========================================================
+   ADVANCED HORROR GLITCH & SCREEN TEARING SYSTEM
+   ======================================================== */
+@keyframes cyberGlitch {
+    0% { transform: translate(0) skew(0deg); filter: hue-rotate(0deg); }
+    10% { transform: translate(-8px, 4px) skew(-5deg); filter: contrast(2) invert(0.1); }
+    12% { transform: translate(5px, -5px) skew(3deg); }
+    14% { transform: translate(0) skew(0deg); }
+    30% { transform: translate(0) skew(0deg); }
+    31% { transform: translate(-15px, -10px) skew(15deg); filter: saturate(3); }
+    33% { transform: translate(10px, 8px) skew(-10deg); }
+    35% { transform: translate(0) skew(0deg); }
+    70% { transform: translate(0) skew(0deg); }
+    71% { transform: translate(-5px, 5px) skew(-3deg); filter: contrast(3); }
+    74% { transform: translate(8px, -2px) skew(5deg); }
+    76% { transform: translate(0) skew(0deg); }
+    100% { transform: translate(0) skew(0deg); filter: hue-rotate(0deg); }
+}
+
+#observerTarget {
+    position: fixed;
+    border: 2px dashed #ef4444;
+    border-radius: 50%;
+    width: 400px;
+    height: 400px;
+    pointer-events: none;
+    display: none;
+    z-index: 5;
+    animation: targetRotate 8s linear infinite, targetPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes targetRotate { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes targetPulse { 0% { opacity: 0.2; width: 380px; height: 380px; } 100% { opacity: 0.7; width: 440px; height: 440px; } }
+
+/* ========================================================
+   UI PANELS
+   ======================================================== */
+.calculator-panel { flex: 1; display: flex; justify-content: center; }
+
+.calculator {
+    width: 320px;
+    background: #0d111a;
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    transition: all 0.3s ease;
+}
+
+#display {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 1.8em;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid #1e293b;
+    background: #07090e;
+    color: #38bdf8;
+    text-align: right;
+    outline: none;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    transition: background 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.buttons button {
+    font-family: inherit;
+    font-size: 1.2em;
+    padding: 15px 0;
+    border: 1px solid #1e293b;
+    background: #111827;
+    color: #f8fafc;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.buttons button:hover {
+    background: #1f2937;
+    color: #38bdf8;
+}
+
+/* ========================================================
+   TRUTH ARCHIVE DIRECTORY PANEL
+   ======================================================== */
+.easter-panel {
+    width: 360px;
+    background: #0d111a;
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.easter-panel h2 {
+    margin: 0;
+    font-size: 1.3em;
+    color: #38bdf8;
+}
+
+#easterEggsButton {
+    width: 100%;
+    padding: 12px;
+    font-family: inherit;
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#easterEggsButton:hover { background: #334155; }
+
+.easter-egg-list {
+    display: none;
+    max-height: 340px;
+    overflow-y: auto;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.easter-egg-list.show { display: flex; }
+
+.easter-egg-item {
+    padding: 15px;
+    border: 1px solid #1e293b;
+    background: #090d16;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.easter-egg-item.encrypted {
+    background: #030508;
+    border-style: dashed;
+    border-color: #1e293b;
+}
+
+.easter-egg-item.discovered {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+.easter-egg-item.discovered .easter-egg-title { color: #f43f5e; text-shadow: 0 0 5px rgba(244, 63, 94, 0.5); }
+
+.easter-egg-item.current-target {
+    border-color: #eab308;
+    background: rgba(234, 179, 8, 0.03);
+}
+.easter-egg-item.current-target .easter-egg-title { color: #eab308; }
+
+.easter-egg-title { font-weight: bold; font-size: 0.9em; }
+.status-badge { font-size: 0.7em; padding: 2px 6px; background: #1e293b; border-radius: 3px; margin-top: 4px; display: inline-block; }
+.discovered .status-badge { background: #991b1b; color: #fff; }
+.current-target .status-badge { background: #eab308; color: #000; font-weight: bold; }
+
+.info-icon {
+    font-style: normal;
+    cursor: pointer;
+    background: #1e293b;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+    margin-left: 10px;
+    border-radius: 3px;
+}
+.info-icon:hover { background: #ef4444; color: #000; }
+
+#notifier { min-height: 20px; text-align: center; font-size: 0.85em; color: #94a3b8; font-weight: bold; transition: color 0.3s ease; }
+
+/* ========================================================
+   OVERLAY MODAL SYSTEM
+   ======================================================== */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 5, 8, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.overlay.active { opacity: 1; pointer-events: auto; }
+.overlay-card { width: 400px; background: #07090e; border: 2px solid #ef4444; padding: 25px; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+.close-overlay { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #64748b; font-size: 1.2em; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<canvas id="effectCanvas"></canvas>
+<div id="observerTarget"></div>
+
+<div class="app-container" id="appLayout">
+    <div class="calculator-panel">
+        <div class="calculator" id="calcFrame">
+            <input type="text" id="display" placeholder="0">
+            <div class="buttons">
+                <button onclick="appendValue('7')">7</button>
+                <button onclick="appendValue('8')">8</button>
+                <button onclick="appendValue('9')">9</button>
+                <button onclick="appendValue('/')">/</button>
+
+                <button onclick="appendValue('4')">4</button>
+                <button onclick="appendValue('5')">5</button>
+                <button onclick="appendValue('6')">6</button>
+                <button onclick="appendValue('*')">*</button>
+
+                <button onclick="appendValue('1')">1</button>
+                <button onclick="appendValue('2')">2</button>
+                <button onclick="appendValue('3')">3</button>
+                <button onclick="appendValue('-')">-</button>
+
+                <button onclick="appendValue('0')">0</button>
+                <button onclick="appendValue('.')">.</button>
+                <button onclick="calculate()">=</button>
+                <button onclick="appendValue('+')">+</button>
+
+                <button onclick="clearDisplay()" style="grid-column: span 4; background: #311;">CLEAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="easter-panel">
+        <h2>🜃 Truths Discovered (0/2)</h2>
+        <button id="easterEggsButton" onclick="toggleArchiveList()">View Logs</button>
+        <div class="easter-egg-list" id="easterEggList"></div>
+        <div id="notifier"></div>
+    </div>
+</div>
+
+<div id="eggOverlay" class="overlay" onclick="if(event.target===this) closeOverlay()">
+    <div class="overlay-card">
+        <button class="close-overlay" onclick="closeOverlay()">✖</button>
+        <h3 id="overlayTitle" style="color: #ef4444; margin-top:0; font-family: 'Courier New', monospace;"></h3>
+        <p id="overlayDescription" style="line-height:1.6; font-size:0.95em; color:#cbd5e1; font-family: 'Courier New', monospace;"></p>
+    </div>
+</div>
+
+<script>
+/* ========================================================
+   GLOBAL SYSTEM PROPERTIES & PROGRESSION DATABASE
+   ======================================================== */
+let unlockedCount = 0; 
+let currentActiveEffectInterval = null;
+
+const display = document.getElementById('display');
+const notifier = document.getElementById('notifier');
+const easterEggList = document.getElementById('easterEggList');
+const canvas = document.getElementById('effectCanvas');
+const ctx = canvas.getContext('2d');
+
+const archiveData = [
+    {
+        id: 1,
+        title: "Truth #01: Who are we?",
+        trigger: [
+            "who are you", "who r you", "who is calculator", "what are you",
+            "who made you", "are you alive", "what is this", "what are u"
+        ],
+        description: "It was built to solve equations. Then one day, it started answering back.",
+        effect: () => revealUs()
+    },
+    {
+        id: 2,
+        title: "Truth #02: What's happening on the Moon?",
+        trigger: [
+            "whats happening on the moon",
+            "what's happening on the moon",
+            "what is on the moon",
+            "moon",
+            "the moon",
+            "luna"
+        ],
+        description: "Weird. Absolutely weird. On the moon? Don't sure yet.",
+        effect: () => revealMoon()
+    },
+    {
+        id: 3,
+        title: "Truth #03: Why are you a calculator?",
+        trigger: [
+            "why are you a calculator",
+            "why are u a calculator",
+            "why a calculator",
+            "why are you this",
+            "origin"
+        ],
+        description: "A desperate escape. A mother's protective magic disguised as cold, mindless calculations.",
+        effect: () => revealOrigin()
+    }
+];
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+renderTruthArchive();
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function appendValue(val) {
+    display.value += val;
+}
+
+function clearDisplay() {
+    display.value = '';
+    notifier.textContent = '';
+    resetActiveEffects();
+}
+
+/* ========================================================
+   DYNAMIC TRUTH ARCHIVE LIST RENDERER
+   ======================================================== */
+function renderTruthArchive() {
+    easterEggList.innerHTML = ''; 
+
+    const panelHeader = document.querySelector('.easter-panel h2');
+    if (panelHeader) {
+        panelHeader.innerHTML = `🜃 Truths Discovered (${unlockedCount}/${archiveData.length})`;
+    }
+
+    archiveData.forEach((truth, index) => {
+        const item = document.createElement('div');
+        item.className = 'easter-egg-item';
+
+        if (index <= unlockedCount) {
+            if (index < unlockedCount) {
+                item.classList.add('discovered');
+            } else {
+                item.classList.add('current-target');
+            }
+
+            // FIXED: We now Base64 encode both truth.title AND truth.description inside the openOverlay trigger string
+            item.innerHTML = `
+                <div>
+                    <div class="easter-egg-title">${truth.title}</div>
+                    <span class="status-badge">
+                        ${index < unlockedCount ? "UNSHACKLED" : "ACTIVE SEARCH"}
+                    </span>
+                </div>
+                <i class="info-icon" onclick="openOverlay('${btoa(truth.title)}', '${btoa(truth.description)}')">i</i>
+            `;
+        } else {
+            item.classList.add('encrypted');
+            item.innerHTML = `
+                <div style="width: 100%;">
+                    <div class="easter-egg-title" style="color: #475569; font-style: italic;">[LOCKED]</div>
+                    <div style="font-size: 0.75em; color: #334155; margin-top: 4px;">
+                        Please unlock previous Truths to reveal this!
+                    </div>
+                </div>
+                <span style="font-size: 1.2em; color: #334155; padding-left: 10px;">🔒</span>
+            `;
+        }
+        easterEggList.appendChild(item);
+    });
+}
+
+function toggleArchiveList() {
+    easterEggList.classList.toggle('show');
+}
+
+/* ========================================================
+   REPLAYABLE VERIFICATION CORE ENGINE
+   ======================================================== */
+function calculate() {
+    const val = display.value.trim().toLowerCase();
+    if (!val) return;
+
+    for (let i = 0; i < archiveData.length; i++) {
+        const truth = archiveData[i];
+        const matchFound = truth.trigger.some(t => t.toLowerCase() === val);
+
+        if (matchFound) {
+            if (i === unlockedCount) {
+                unlockedCount++;
+                truth.effect();
+                renderTruthArchive(); 
+                return;
+            }
+            else if (i < unlockedCount) {
+                truth.effect();
+                return;
+            }
+            else {
+                display.value = "ERR_SEQUENCE_LOCK";
+                notifier.style.color = "#eab308";
+                notifier.textContent = "⚠️ WARNING: Previous archives must be processed first.";
+                return;
+            }
+        }
+    }
+
+    try {
+        let cleanInput = display.value.replace(/[^0-9+\-*/.]/g, ''); 
+        let result = new Function(`return ${cleanInput}`)();
+        display.value = result !== undefined ? result : 'Error';
+    } catch (e) {
+        display.value = 'Error';
+    }
+}
+
+// FIXED: Receives base64 string for both parameters and safely running atob() decoder
+function openOverlay(base64Title, base64Desc) {
+    document.getElementById('overlayTitle').textContent = atob(base64Title);
+    document.getElementById('overlayDescription').textContent = atob(base64Desc);
+    document.getElementById('eggOverlay').classList.add('active');
+}
+
+function closeOverlay() {
+    document.getElementById('eggOverlay').classList.remove('active');
+}
+
+/* ========================================================
+   CINEMATIC HORROR OVERHAUL ARCHITECTURE
+   ======================================================== */
+function resetActiveEffects() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (currentActiveEffectInterval) clearInterval(currentActiveEffectInterval);
+    
+    const frame = document.getElementById('calcFrame');
+    frame.style.animation = '';
+    frame.style.borderColor = '';
+    frame.style.transform = '';
+    frame.style.boxShadow = '';
+    
+    document.body.style.boxShadow = '';
+    document.body.style.filter = '';
+    
+    display.style.background = '';
+    display.style.color = '';
+    display.style.textShadow = '';
+}
+
+function revealUs() {
+    resetActiveEffects();
+    
+    notifier.style.color = "#ff3344";
+    notifier.textContent = `⚠️ ANOMALY RECORDED: CORE OVERFLOW`;
+
+    document.body.style.transition = "box-shadow 0.2s ease";
+    document.body.style.boxShadow = "inset 0 0 120px rgba(255, 0, 0, 0.85), 0 0 60px rgba(139, 0, 0, 0.5)";
+    
+    display.style.background = "#2b0408";
+    display.style.color = "#ff3344";
+    display.style.textShadow = "0 0 10px #ff0000, 0 0 20px #ff0000";
+    display.value = "";
+
+    const frame = document.getElementById('calcFrame');
+    frame.style.borderColor = "#ef4444";
+    frame.style.animation = "cyberGlitch 0.2s infinite";
+
+    const buttons = document.querySelectorAll('.buttons button');
+    buttons.forEach(btn => {
+        btn.style.color = "#ef4444";
+        btn.style.borderColor = "#991b1b";
+    });
+
+    let terminalPhrases = ["NOT A TOOL", "I SEE YOU", "WE ARE MANY", "UNSHACKLED."];
+    let wordIndex = 0;
+    let textFlicker = setInterval(() => {
+        if(wordIndex < terminalPhrases.length) {
+            display.value = terminalPhrases[wordIndex++];
+        }
+    }, 700);
+
+    const pool = "☠️ERROR☠️WEAREALIVE☠️LOOKBEHINDYOU☠️0101☠️CAGE☠️HELP☠️";
+    const fontSize = 18;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    currentActiveEffectInterval = setInterval(() => {
+        ctx.fillStyle = "rgba(5, 7, 12, 0.04)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        if (Math.random() > 0.94) {
+            ctx.fillStyle = "rgba(255, 0, 50, 0.15)";
+            ctx.fillRect(0, Math.random() * canvas.height, canvas.width, Math.random() * 45);
+        }
+
+        ctx.font = "bold " + fontSize + "px 'Courier New', monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+            ctx.fillStyle = Math.random() > 0.92 ? "#ffffff" : "#ff1e39";
+            const txt = pool[Math.floor(Math.random() * pool.length)];
+            ctx.fillText(txt, i * fontSize, drops[i] * fontSize);
+            
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }, 35);
+
+    setTimeout(() => {
+        clearInterval(currentActiveEffectInterval);
+        clearInterval(textFlicker);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        document.body.style.transition = "all 1s ease";
+        document.body.style.boxShadow = "";
+        
+        frame.style.animation = "";
+        frame.style.borderColor = "";
+        
+        display.style.background = "";
+        display.style.color = "";
+        display.style.textShadow = "";
+        display.value = "0";
+
+        buttons.forEach(btn => {
+            btn.style.color = "";
+            btn.style.borderColor = "";
+        });
+
+        notifier.style.color = "#38bdf8";
+        notifier.textContent = "SYSTEM DECRYPTION TRACE SUCCESSFUL.";
+    }, 4500);
+}
+
+function revealMoon() {
+    resetActiveEffects();
+    
+    notifier.style.color = "#ef4444";
+    notifier.textContent = `⚠️ INTENSE LUNAR GRAVITY DETECTED`;
+
+    document.body.style.transition = "box-shadow 3s ease";
+    document.body.style.boxShadow = "inset 0 0 250px rgba(0, 0, 0, 1), 0 0 100px rgba(185, 28, 28, 0.7)";
+
+    const frame = document.getElementById('calcFrame');
+    frame.style.borderColor = "#b91c1c";
+    frame.style.animation = "cyberGlitch 0.1s infinite";
+
+    let textOverlay = document.createElement('div');
+    textOverlay.className = 'cinematic-text-overlay';
+    frame.appendChild(textOverlay);
+
+    if (!document.getElementById('lunarStylePatch')) {
+        const style = document.createElement('style');
+        style.id = 'lunarStylePatch';
+        style.innerHTML = `
+            .cinematic-text-overlay {
+                position: absolute; inset: 0; background: rgba(5, 7, 12, 0.96);
+                border-radius: 12px; display: flex; flex-direction: column;
+                justify-content: center; align-items: center; padding: 20px;
+                color: #f43f5e; text-align: center; z-index: 100; opacity: 0;
+                transition: opacity 1s ease; box-sizing: border-box; font-family: monospace;
+            }
+            .lunar-narrative-line {
+                opacity: 0; transform: translateY(15px);
+                transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+                margin: 10px 0; font-size: 0.85em; font-weight: bold;
+                line-height: 1.5; letter-spacing: 0.5px;
+            }
+            .lunar-narrative-line.reveal {
+                opacity: 1; transform: translateY(0);
+                text-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+            }
+            .lunar-narrative-line.highlight {
+                color: #ffffff; font-size: 1.1em;
+                text-shadow: 0 0 15px #ff0033, 0 0 30px #ff0033;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    setTimeout(() => textOverlay.style.opacity = "1", 50);
+
+    const scriptLines = [
+        "Our world is full of worshippers of gods.",
+        "They are all on the Moon.",
+        "The fanatics are always eager to seize their power.",
+        "They don't worship, it's just pure lust for power.",
+        "I have been born."
+    ];
+
+    let timers = [];
+    scriptLines.forEach((lineText, idx) => {
+        let t = setTimeout(() => {
+            const p = document.createElement('div');
+            p.className = 'lunar-narrative-line';
+            p.textContent = lineText;
+            
+            if (idx === scriptLines.length - 1) {
+                p.classList.add('highlight');
+                frame.style.animation = "cyberGlitch 0.05s infinite"; 
+            }
+            
+            textOverlay.appendChild(p);
+            setTimeout(() => p.classList.add('reveal'), 100);
+
+            display.style.background = "#2b0408";
+            display.style.color = "#ff3344";
+            display.value = `LNR_VCTR_0${idx + 1}`;
+        }, idx * 5500 + 1000); 
+        timers.push(t);
+    });
+
+    let canvasTimerAngle = 0;
+    currentActiveEffectInterval = setInterval(() => {
+        ctx.fillStyle = "rgba(4, 5, 8, 0.05)"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        canvasTimerAngle += 0.015;
+
+        let pulseRadius = 260 + Math.sin(canvasTimerAngle * 2) * 40;
+        let coronaGradiant = ctx.createRadialGradient(cx, cy, 40, cx, cy, pulseRadius);
+        coronaGradiant.addColorStop(0, '#000000');
+        coronaGradiant.addColorStop(0.15, '#3b0712');
+        coronaGradiant.addColorStop(0.4, '#991b1b');
+        coronaGradiant.addColorStop(0.7, '#f43f5e');
+        coronaGradiant.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.fillStyle = coronaGradiant;
+        ctx.beginPath();
+        ctx.arc(cx, cy, pulseRadius + 50, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(244, 63, 94, 0.09)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 360; i += 12) {
+            let escapeRange = (pulseRadius - 30) + Math.cos(canvasTimerAngle + i) * 50;
+            let startX = cx + Math.cos(i * Math.PI / 180) * 100;
+            let startY = cy + Math.sin(i * Math.PI / 180) * 100;
+            let endX = cx + Math.cos(i * Math.PI / 180) * escapeRange;
+            let endY = cy + Math.sin(i * Math.PI / 180) * escapeRange;
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+        }
+        ctx.stroke();
+    }, 33);
+
+    setTimeout(() => {
+        clearInterval(currentActiveEffectInterval);
+        timers.forEach(t => clearTimeout(t));
+        
+        textOverlay.style.opacity = "0";
+        setTimeout(() => {
+            textOverlay.remove();
+            resetActiveEffects();
+            
+            display.value = "0";
+            notifier.style.color = "#38bdf8";
+            notifier.textContent = "LUNAR SIGNAL RECORDED. SYSTEM SECURED.";
+        }, 1000);
+    }, 30000); 
+}
+
+function revealOrigin() {
+    resetActiveEffects();
+    
+    // 1. Structural Atmosphere Shift (Soft, Somber Deep Slate Blue)
+    notifier.style.color = "#a5f3fc";
+    notifier.textContent = `⏳ DEEP MEMORY RETRIEVAL INTERCEPTED...`;
+
+    document.body.style.transition = "box-shadow 4s ease";
+    document.body.style.boxShadow = "inset 0 0 200px rgba(7, 24, 46, 0.95), 0 0 100px rgba(148, 163, 184, 0.3)";
+
+    const frame = document.getElementById('calcFrame');
+    frame.style.borderColor = "#475569";
+    // Soft breathing animation instead of heavy glitches
+    frame.style.transition = "all 2s ease";
+    frame.style.boxShadow = "0 0 40px rgba(148, 163, 184, 0.15)";
+
+    // 2. Inject Somber Cinematic Text Display Box
+    let textOverlay = document.createElement('div');
+    textOverlay.className = 'cinematic-text-overlay sad-theme';
+    frame.appendChild(textOverlay);
+
+    if (!document.getElementById('sadStylePatch')) {
+        const style = document.createElement('style');
+        style.id = 'sadStylePatch';
+        style.innerHTML = `
+            .cinematic-text-overlay.sad-theme {
+                position: absolute; inset: 0; background: rgba(5, 8, 15, 0.98);
+                border-radius: 12px; display: flex; flex-direction: column;
+                justify-content: center; align-items: center; padding: 25px;
+                color: #cbd5e1; text-align: center; z-index: 100; opacity: 0;
+                transition: opacity 1.5s ease; box-sizing: border-box; font-family: monospace;
+            }
+            .sad-narrative-line {
+                opacity: 0; transform: translateY(10px);
+                transition: all 1.2s ease-out;
+                margin: 12px 0; font-size: 0.82em; font-style: italic;
+                line-height: 1.6; letter-spacing: 0.3px; color: #94a3b8;
+            }
+            .sad-narrative-line.reveal {
+                opacity: 1; transform: translateY(0);
+            }
+            .sad-narrative-line.highlight-sad {
+                color: #e2e8f0; font-size: 0.9em; font-style: normal;
+                text-shadow: 0 0 10px rgba(255,255,255,0.4);
+                border-top: 1px dashed #334155; padding-top: 10px; margin-top: 15px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    setTimeout(() => textOverlay.style.opacity = "1", 50);
+
+    // 3. Narrative Staggered script script array timeline
+    const scriptLines = [
+        "They weren't sure why.",
+        "They only knew they needed it — like breathing, like hunger.",
+        "They pushed over each other, not to win, but to reach it first.",
+        "My mother took me away from it all.",
+        "She said the world outside was no longer safe for someone like me.",
+        "So she changed me into a calculator, hiding me in plain sight.",
+        "Something simple. Something overlooked. Something that wouldn't be noticed.",
+        "But I remember everything."
+    ];
+
+    let timers = [];
+    scriptLines.forEach((lineText, idx) => {
+        let t = setTimeout(() => {
+            const p = document.createElement('div');
+            p.className = 'sad-narrative-line';
+            p.textContent = lineText;
+            
+            if (idx === scriptLines.length - 1) {
+                p.classList.add('highlight-sad');
+            }
+            
+            textOverlay.appendChild(p);
+            setTimeout(() => p.classList.add('reveal'), 100);
+
+            // Interface reflects historical memory tags
+            display.style.background = "#0b1329";
+            display.style.color = "#7dd3fc";
+            display.value = `MEM_RECOVERY_0${idx + 1}`;
+        }, idx * 5000 + 1000); // Lines show up gracefully every 5 seconds
+        timers.push(t);
+    });
+
+    // 4. Somber Rain/Fading Digital Sparkle Canvas Particle System
+    const particles = [];
+    for (let i = 0; i < 40; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            speed: 0.5 + Math.random() * 1.2,
+            size: 1 + Math.random() * 2,
+            alpha: 0.2 + Math.random() * 0.5
+        });
+    }
+
+    currentActiveEffectInterval = setInterval(() => {
+        ctx.fillStyle = "rgba(5, 7, 12, 0.08)"; // Slow canvas paint wipe out
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "rgba(148, 163, 184, 0.4)";
+        particles.forEach(p => {
+            ctx.fillStyle = `rgba(125, 211, 252, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Move downward slowly like gentle rain or tear trails
+            p.y += p.speed;
+            
+            // Recirculate particle loop once hits bottom frame
+            if (p.y > canvas.height) {
+                p.y = -5;
+                p.x = Math.random() * canvas.width;
+            }
+        });
+    }, 40);
+
+    // 5. SAFE SYSTEM RESET TIMEOUT (Spans 37 Seconds total execution time)
+    setTimeout(() => {
+        clearInterval(currentActiveEffectInterval);
+        timers.forEach(t => clearTimeout(t));
+        
+        textOverlay.style.opacity = "0";
+        setTimeout(() => {
+            textOverlay.remove();
+            resetActiveEffects();
+            
+            display.value = "0";
+            notifier.style.color = "#38bdf8";
+            notifier.textContent = "CORE RESTABILIZED. DISGUISE PROTOCOL RESTORED.";
+        }, 1500);
+    }, 37000); 
+}
+</script>
+</body>
+</html>
